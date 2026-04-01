@@ -2,7 +2,7 @@
 // Complete with profile, matching, Telegram Stars, referrals, virtual AI partners, language support
 
 require('dotenv').config();
-const { Telegraf, session, Scenes, Composer, Markup } = require('telegraf');
+const { Telegraf, session, Scenes, Markup } = require('telegraf');
 const mongoose = require('mongoose');
 
 // Environment variables
@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
   name: String,
   age: Number,
   gender: { type: String, enum: ['male', 'female', 'other'] },
-  language: { type: String, default: 'english' }, // added language field
+  language: { type: String, default: 'english' },
   photo_file_id: String,
   active_match: { type: Number, default: null },
   free_messages_left: { type: Number, default: 2 },
@@ -49,7 +49,7 @@ const messageSchema = new mongoose.Schema({
 const transactionSchema = new mongoose.Schema({
   user_id: Number,
   amount: Number,
-  type: String, // 'purchase', 'spent', 'boost'  (commission removed)
+  type: String,
   related_user: Number,
   timestamp: { type: Date, default: Date.now }
 });
@@ -59,7 +59,30 @@ const Message = mongoose.model('Message', messageSchema);
 const Transaction = mongoose.model('Transaction', transactionSchema);
 
 // Constants
-const COST_PER_MESSAGE = 1; // stars
+const COST_PER_MESSAGE = 1;
+
+// Helper functions
+async function getUser(userId) {
+  return await User.findOne({ user_id: userId });
+}
+
+async function updateUser(userId, updateData) {
+  return await User.findOneAndUpdate({ user_id: userId }, updateData, { upsert: true, new: true });
+}
+
+async function incrementUser(userId, field, amount = 1) {
+  return await User.findOneAndUpdate({ user_id: userId }, { $inc: { [field]: amount } }, { new: true });
+}
+
+async function recordTransaction(userId, amount, type, relatedUserId = null) {
+  const tx = new Transaction({
+    user_id: userId,
+    amount,
+    type,
+    related_user: relatedUserId
+  });
+  await tx.save();
+}
 
 // --------------------- Language Definitions ---------------------
 const languages = [
@@ -72,7 +95,6 @@ const languages = [
 ];
 
 // --------------------- Reply Generator for Virtual Users (Language Specific) ---------------------
-// Each language has its own set of replies
 const replies = {
   hindi: {
     greetings: ['नमस्ते! कैसे हो? 😊', 'हैलो! क्या हाल हैं?', 'हाय! सब ठीक?'],
@@ -136,18 +158,16 @@ const replies = {
   }
 };
 
-// Helper to get a random item from an array
 function getRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-// Generate reply based on user's language and message
 function generateReply(messageText, virtualUser, userLanguage) {
   const lowerMsg = messageText.toLowerCase();
   const lang = userLanguage || 'english';
   const dict = replies[lang] || replies.english;
 
-  // Basic detection of phrases
+  // Detection of phrases in multiple languages
   if (lowerMsg.includes('hello') || lowerMsg.includes('hi') || lowerMsg.includes('hey') ||
       lowerMsg.includes('नमस्ते') || lowerMsg.includes('வணக்கம்') || lowerMsg.includes('నమస్కారం') ||
       lowerMsg.includes('নমস্কার') || lowerMsg.includes('नमस्कार')) {
@@ -180,38 +200,13 @@ function generateReply(messageText, virtualUser, userLanguage) {
       lowerMsg.includes('फोटो')) {
     return dict.photo;
   }
-  // Default
   return getRandom(dict.default);
-}
-
-// --------------------- Helper Functions ---------------------
-async function getUser(userId) {
-  return await User.findOne({ user_id: userId });
-}
-
-async function updateUser(userId, updateData) {
-  return await User.findOneAndUpdate({ user_id: userId }, updateData, { upsert: true, new: true });
-}
-
-async function incrementUser(userId, field, amount = 1) {
-  return await User.findOneAndUpdate({ user_id: userId }, { $inc: { [field]: amount } }, { new: true });
-}
-
-async function recordTransaction(userId, amount, type, relatedUserId = null) {
-  const tx = new Transaction({
-    user_id: userId,
-    amount,
-    type,
-    related_user: relatedUserId
-  });
-  await tx.save();
 }
 
 // --------------------- Virtual Users Creation ---------------------
 async function createVirtualUsers() {
   const virtualCount = await User.countDocuments({ is_virtual: true });
   if (virtualCount === 0) {
-    // You must replace these photo_file_id with actual Telegram file IDs.
     const virtuals = [
       { name: 'Priya', age: 24, gender: 'female', language: 'hindi', photo_file_id: 'PLACEHOLDER_PRIYA' },
       { name: 'Anjali', age: 28, gender: 'female', language: 'english', photo_file_id: 'PLACEHOLDER_ANJALI' },
@@ -248,7 +243,7 @@ async function createVirtualUsers() {
 const bot = new Telegraf(BOT_TOKEN);
 bot.use(session());
 
-// --------------------- Registration Wizard (with Language Selection) ---------------------
+// --------------------- Registration Wizard ---------------------
 const registrationStage = new Scenes.WizardScene(
   'registration',
   async (ctx) => {
@@ -292,8 +287,6 @@ const registrationStage = new Scenes.WizardScene(
     }
     ctx.wizard.state.gender = gender;
     await ctx.answerCbQuery();
-
-    // Language selection keyboard
     const langKeyboard = Markup.inlineKeyboard(
       languages.map(lang => [Markup.button.callback(`${lang.flag} ${lang.name}`, lang.code)])
     );
@@ -324,7 +317,6 @@ const registrationStage = new Scenes.WizardScene(
     const photo = ctx.message.photo[ctx.message.photo.length - 1];
     const fileId = photo.file_id;
 
-    // Save user to DB
     const referrerId = ctx.session.referred_by || null;
     const newUser = new User({
       user_id: ctx.from.id,
@@ -341,7 +333,6 @@ const registrationStage = new Scenes.WizardScene(
     });
     await newUser.save();
 
-    // Handle referral (still gives free messages every 5 referrals)
     if (referrerId) {
       const referrer = await getUser(referrerId);
       if (referrer) {
@@ -364,6 +355,10 @@ const registrationStage = new Scenes.WizardScene(
     return ctx.scene.leave();
   }
 );
+
+// --------------------- Stage Middleware (MUST be before any command that uses scenes) ---------------------
+const stage = new Scenes.Stage([registrationStage]);
+bot.use(stage.middleware());
 
 // --------------------- Command Handlers ---------------------
 bot.start(async (ctx) => {
@@ -435,7 +430,6 @@ bot.command('find', async (ctx) => {
     language: user.language
   });
 
-  let isVirtual = false;
   if (candidates.length === 0) {
     // No same language real users, try any real users
     candidates = await User.find({
@@ -446,6 +440,7 @@ bot.command('find', async (ctx) => {
     });
   }
 
+  let isVirtual = false;
   if (candidates.length === 0) {
     // No real users, fallback to virtual
     candidates = await User.find({
@@ -636,18 +631,14 @@ bot.on('text', async (ctx) => {
   // Check if match is virtual
   const match = await getUser(matchId);
   if (match.is_virtual) {
-    // Virtual partner – generate automatic reply in the user's language
     const reply = generateReply(ctx.message.text, match, user.language);
     const delayMs = Math.floor(Math.random() * 6000) + 2000; // 2-8 seconds
-    
-    // Store the original message
+
     const originalMsg = new Message({ from_id: userId, to_id: matchId, text: ctx.message.text });
     await originalMsg.save();
 
-    // Confirm to sender
     await ctx.reply(`✅ Message sent! (${costUsed} used)`);
 
-    // Send reply after delay
     setTimeout(async () => {
       await ctx.telegram.sendMessage(ctx.chat.id, `*${match.name}:* ${reply}`, { parse_mode: 'Markdown' });
       const replyMsg = new Message({ from_id: matchId, to_id: userId, text: reply });
@@ -663,11 +654,7 @@ bot.on('text', async (ctx) => {
   await ctx.reply(`✅ Message sent! (${costUsed} used)`);
 });
 
-// --------------------- Stage and Webhook ---------------------
-const stage = new Scenes.Stage([registrationStage]);
-bot.use(stage.middleware());
-
-// Start webhook
+// --------------------- Start Webhook ---------------------
 bot.telegram.setWebhook(`${WEBHOOK_URL}/webhook`).then(() => {
   console.log('Webhook set');
 });
