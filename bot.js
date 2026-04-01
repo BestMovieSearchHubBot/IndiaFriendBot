@@ -23,15 +23,14 @@ const userSchema = new mongoose.Schema({
   user_id: { type: Number, unique: true, required: true },
   name: { type: String, default: '' },
   cards: { type: Number, default: 1 },          // free scratch cards
-  points: { type: Number, default: 0 },         // total earned (in dollars * 100 or just integer)
+  points: { type: Number, default: 0 },         // total earned (in cents)
   referrals_count: { type: Number, default: 0 },
   referred_by: { type: Number, default: null },
-  last_scratch_date: Date,                       // for daily bonus later
   created_at: { type: Date, default: Date.now }
 });
 userSchema.index({ user_id: 1 }, { unique: true });
-userSchema.index({ referrals_count: -1 });      // for leaderboard
-userSchema.index({ points: -1 });               // for earning leaderboard
+userSchema.index({ referrals_count: -1 });
+userSchema.index({ points: -1 });
 
 const transactionSchema = new mongoose.Schema({
   user_id: Number,
@@ -40,7 +39,7 @@ const transactionSchema = new mongoose.Schema({
   details: String,
   timestamp: { type: Date, default: Date.now }
 });
-transactionSchema.index({ timestamp: -1 });      // auto cleanup later
+transactionSchema.index({ timestamp: -1 });
 
 const User = mongoose.model('User', userSchema);
 const Transaction = mongoose.model('Transaction', transactionSchema);
@@ -57,13 +56,12 @@ const prizes = [
   { fruit: '🍍 Pineapple', value: 1.75 }
 ];
 
-// Helper: random prize
 function getRandomPrize() {
   const idx = Math.floor(Math.random() * prizes.length);
   return prizes[idx];
 }
 
-// Helper: update user & record transaction
+// Helper: add points (cents) and record transaction
 async function addPoints(userId, points, reason) {
   const user = await User.findOneAndUpdate(
     { user_id: userId },
@@ -74,6 +72,7 @@ async function addPoints(userId, points, reason) {
   return user;
 }
 
+// Helper: add cards and record transaction
 async function addCards(userId, cards, reason, relatedUserId = null) {
   const user = await User.findOneAndUpdate(
     { user_id: userId },
@@ -86,10 +85,6 @@ async function addCards(userId, cards, reason, relatedUserId = null) {
 
 async function getUser(userId) {
   return await User.findOne({ user_id: userId });
-}
-
-async function updateUser(userId, data) {
-  return await User.findOneAndUpdate({ user_id: userId }, data, { upsert: true, new: true });
 }
 
 async function setupIndexes() {
@@ -114,10 +109,6 @@ bot.start(async (ctx) => {
     referrerId = parseInt(args[1].slice(4));
     if (!isNaN(referrerId) && referrerId !== userId) {
       ctx.session.referred_by = referrerId;
-      const referrer = await getUser(referrerId);
-      if (referrer) {
-        await ctx.telegram.sendMessage(referrerId, `🔔 ${ctx.from.first_name} used your referral link!`);
-      }
     }
   }
 
@@ -138,6 +129,8 @@ bot.start(async (ctx) => {
     // Reward referrer with 1 card
     if (user.referred_by) {
       await addCards(user.referred_by, 1, 'referral_bonus', userId);
+      // Increment referrer's referrals_count
+      await User.updateOne({ user_id: user.referred_by }, { $inc: { referrals_count: 1 } });
       await ctx.telegram.sendMessage(user.referred_by, `🎁 You got 1 extra scratch card because ${ctx.from.first_name} joined using your link!`);
     }
 
@@ -150,30 +143,28 @@ bot.command('scratch', async (ctx) => {
   const userId = ctx.from.id;
   const user = await getUser(userId);
   if (!user) return ctx.reply('Please /start first.');
-
   if (user.cards <= 0) {
     return ctx.reply('You have no scratch cards left. Get more by referring friends (/referral) or buying cards with stars (/buy).');
   }
 
-  // Show 6 card buttons
+  // Build keyboard with 6 card buttons
   const cardButtons = [];
   for (let i = 1; i <= 6; i++) {
     cardButtons.push(Markup.button.callback(`🎴 ${i}`, `scratch_${i}`));
   }
   const keyboard = Markup.inlineKeyboard([
-    cardButtons.slice(0,3),
-    cardButtons.slice(3,6)
+    cardButtons.slice(0, 3),
+    cardButtons.slice(3, 6)
   ]);
   const msg = await ctx.reply('👇 Choose a card to scratch!', keyboard);
+  // Store the message ID so we can edit it later
   ctx.session.scratchMsgId = msg.message_id;
 });
 
-// Scratch action handler
 bot.action(/scratch_\d+/, async (ctx) => {
   const userId = ctx.from.id;
   const user = await getUser(userId);
   if (!user) return ctx.answerCbQuery('Please /start first.');
-
   if (user.cards <= 0) {
     await ctx.answerCbQuery('No cards left!');
     await ctx.editMessageText('You have no scratch cards left. Get more via /referral or /buy.');
@@ -183,16 +174,30 @@ bot.action(/scratch_\d+/, async (ctx) => {
   // Deduct one card
   await User.updateOne({ user_id: userId }, { $inc: { cards: -1 } });
   const prize = getRandomPrize();
-  const pointsEarned = Math.round(prize.value * 100); // store as cents
+  const pointsEarned = Math.round(prize.value * 100);
   await addPoints(userId, pointsEarned, `Won ${prize.fruit}`);
 
-  // Delete the original scratch message
-  if (ctx.session.scratchMsgId) {
-    await ctx.deleteMessage(ctx.session.scratchMsgId).catch(() => {});
+  // Get the original message ID (stored in session)
+  const scratchMsgId = ctx.session.scratchMsgId;
+  if (scratchMsgId) {
+    // Edit the original message: remove buttons and show the result
+    const resultText = `🍀 *You scratched a card and got:*\n${prize.fruit} – $${prize.value.toFixed(2)}\n\nNew balance: $${((user.points + pointsEarned)/100).toFixed(2)}\nYou have ${user.cards-1} cards left.`;
+    const playAgainKeyboard = Markup.inlineKeyboard([
+      [Markup.button.callback('🎲 Play Again', 'play_again')]
+    ]);
+    await ctx.editMessageText(resultText, { parse_mode: 'Markdown', ...playAgainKeyboard });
+    delete ctx.session.scratchMsgId;
+  } else {
+    // Fallback: send new message
+    await ctx.reply(`🍀 You scratched a card and got ${prize.fruit} – $${prize.value.toFixed(2)}\nBalance: $${((user.points + pointsEarned)/100).toFixed(2)}`);
   }
-
   await ctx.answerCbQuery();
-  await ctx.replyWithMarkdown(`🍀 *You scratched a card and got:*\n${prize.fruit} – $${prize.value.toFixed(2)}\n\nNew balance: $${((user.points + pointsEarned)/100).toFixed(2)}\nYou have ${user.cards-1} cards left.`);
+});
+
+bot.action('play_again', async (ctx) => {
+  await ctx.answerCbQuery();
+  // Trigger the /scratch command again
+  await ctx.telegram.sendMessage(ctx.chat.id, '/scratch');
 });
 
 // --------------------- Referral System ---------------------
@@ -245,7 +250,7 @@ bot.on('successful_payment', async (ctx) => {
   }
 });
 
-// --------------------- Balance & Stats ---------------------
+// --------------------- Balance & Leaderboard ---------------------
 bot.command('balance', async (ctx) => {
   const userId = ctx.from.id;
   const user = await getUser(userId);
@@ -272,12 +277,6 @@ bot.command('leaderboard', async (ctx) => {
 bot.command('help', async (ctx) => {
   const text = `🎮 *Commands*\n/start – Register & get your first card\n/scratch – Scratch a card\n/buy – Buy more cards with Stars\n/referral – Invite friends & earn cards\n/balance – Your stats\n/leaderboard – Top players\n\n*How to win:* Each card gives a random fruit worth $0.25 to $2. Collect points and compete on the leaderboard!`;
   await ctx.reply(text, { parse_mode: 'Markdown' });
-});
-
-// --------------------- Message Handler (ignore non‑commands) ---------------------
-bot.on('text', async (ctx) => {
-  if (!ctx.message.text.startsWith('/')) return;
-  // commands already handled
 });
 
 // --------------------- Webhook ---------------------
