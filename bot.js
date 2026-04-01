@@ -1,4 +1,4 @@
-// India Scratch & Win Bot – Withdrawal + Menu + Referral Button
+// India Scratch & Win Bot – Custom Menu Layout
 require('dotenv').config();
 const { Telegraf, session, Markup } = require('telegraf');
 const mongoose = require('mongoose');
@@ -8,7 +8,7 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 const MONGODB_URI = process.env.MONGODB_URI;
 const WEBHOOK_URL = process.env.WEBHOOK_URL;
 const PORT = process.env.PORT || 8443;
-const ADMIN_CHANNEL_ID = process.env.ADMIN_CHANNEL_ID; // e.g., -1001234567890
+const ADMIN_CHANNEL_ID = process.env.ADMIN_CHANNEL_ID;
 
 // Connect to MongoDB
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema({
   user_id: { type: Number, unique: true, required: true },
   name: { type: String, default: '' },
   cards: { type: Number, default: 1 },
-  points: { type: Number, default: 0 }, // in cents
+  points: { type: Number, default: 0 },
   referrals_count: { type: Number, default: 0 },
   referred_by: { type: Number, default: null },
   created_at: { type: Date, default: Date.now }
@@ -36,7 +36,7 @@ userSchema.index({ points: -1 });
 const transactionSchema = new mongoose.Schema({
   user_id: Number,
   amount: Number,
-  type: String, // 'purchase', 'referral_bonus', 'scratch_win', 'withdraw'
+  type: String,
   details: String,
   timestamp: { type: Date, default: Date.now }
 });
@@ -45,7 +45,7 @@ transactionSchema.index({ timestamp: -1 });
 const withdrawalSchema = new mongoose.Schema({
   user_id: Number,
   name: String,
-  amount: Number, // in dollars (float)
+  amount: Number,
   upi_id: String,
   status: { type: String, default: 'pending' },
   created_at: { type: Date, default: Date.now }
@@ -55,7 +55,7 @@ const User = mongoose.model('User', userSchema);
 const Transaction = mongoose.model('Transaction', transactionSchema);
 const Withdrawal = mongoose.model('Withdrawal', withdrawalSchema);
 
-// Prize list (fruit, value in dollars)
+// Prize list
 const prizes = [
   { fruit: '🍓 Strawberry', value: 0.50 },
   { fruit: '🍊 Orange', value: 0.75 },
@@ -72,7 +72,6 @@ function getRandomPrize() {
   return prizes[idx];
 }
 
-// Helper: escape HTML special characters
 function escapeHtml(text) {
   if (!text) return '';
   return text
@@ -121,16 +120,18 @@ bot.use(session());
 let botUsername = '';
 bot.telegram.getMe().then(info => { botUsername = info.username; });
 
-// --------------------- Main Menu ---------------------
+// --------------------- Custom Menu Layout ---------------------
 function getMainMenu() {
   return Markup.inlineKeyboard([
-    [Markup.button.callback('🎲 Scratch Card', 'menu_scratch')],
-    [Markup.button.callback('🎁 Buy Cards', 'menu_buy')],
-    [Markup.button.callback('👥 Referral', 'menu_referral')],
-    [Markup.button.callback('💰 Balance', 'menu_balance')],
-    [Markup.button.callback('🏆 Leaderboard', 'menu_leaderboard')],
-    [Markup.button.callback('💸 Withdraw', 'menu_withdraw')],
-    [Markup.button.callback('❓ Help', 'menu_help')]
+    [
+      Markup.button.callback('🎲 Scratch', 'menu_scratch'),
+      Markup.button.callback('👥 Referral', 'menu_referral')
+    ],
+    [
+      Markup.button.callback('💰 Balance', 'menu_balance'),
+      Markup.button.callback('🏆 Leaderboard', 'menu_leaderboard'),
+      Markup.button.callback('💸 Withdraw', 'menu_withdraw')
+    ]
   ]);
 }
 
@@ -148,7 +149,10 @@ bot.start(async (ctx) => {
 
   let user = await getUser(userId);
   if (user) {
-    await ctx.reply(`🎉 Welcome back, <b>${escapeHtml(user.name || ctx.from.first_name)}</b>!\nYou have ${user.cards} scratch cards.\nBalance: $${(user.points/100).toFixed(2)}`, { parse_mode: 'HTML', ...getMainMenu() });
+    await ctx.reply(
+      `🎉 Welcome back, <b>${escapeHtml(user.name || ctx.from.first_name)}</b>!\nYou have ${user.cards} scratch cards.\nBalance: $${(user.points/100).toFixed(2)}`,
+      { parse_mode: 'HTML', ...getMainMenu() }
+    );
   } else {
     user = new User({
       user_id: userId,
@@ -177,35 +181,21 @@ bot.action('menu_scratch', async (ctx) => {
   await ctx.answerCbQuery();
   await ctx.telegram.sendMessage(ctx.chat.id, '/scratch');
 });
-
-bot.action('menu_buy', async (ctx) => {
-  await ctx.answerCbQuery();
-  await ctx.telegram.sendMessage(ctx.chat.id, '/buy');
-});
-
 bot.action('menu_referral', async (ctx) => {
   await ctx.answerCbQuery();
   await ctx.telegram.sendMessage(ctx.chat.id, '/referral');
 });
-
 bot.action('menu_balance', async (ctx) => {
   await ctx.answerCbQuery();
   await ctx.telegram.sendMessage(ctx.chat.id, '/balance');
 });
-
 bot.action('menu_leaderboard', async (ctx) => {
   await ctx.answerCbQuery();
   await ctx.telegram.sendMessage(ctx.chat.id, '/leaderboard');
 });
-
 bot.action('menu_withdraw', async (ctx) => {
   await ctx.answerCbQuery();
   await ctx.telegram.sendMessage(ctx.chat.id, '/withdraw');
-});
-
-bot.action('menu_help', async (ctx) => {
-  await ctx.answerCbQuery();
-  await ctx.telegram.sendMessage(ctx.chat.id, '/help');
 });
 
 // --------------------- Scratch Card ---------------------
@@ -247,10 +237,11 @@ bot.action(/scratch_\d+/, async (ctx) => {
   const scratchMsgId = ctx.session.scratchMsgId;
   if (scratchMsgId) {
     const resultText = `🍀 <b>You scratched a card and got:</b>\n${prize.fruit} – $${prize.value.toFixed(2)}\n\n<b>New balance:</b> $${((user.points + pointsEarned)/100).toFixed(2)}\n<b>Cards left:</b> ${user.cards-1}`;
-    const playAgainKeyboard = Markup.inlineKeyboard([
-      [Markup.button.callback('🎲 Play Again', 'play_again')]
+    const afterScratchKeyboard = Markup.inlineKeyboard([
+      [Markup.button.callback('🎲 Play Again', 'play_again')],
+      [Markup.button.callback('🏠 Main Menu', 'menu_show')]
     ]);
-    await ctx.editMessageText(resultText, { parse_mode: 'HTML', ...playAgainKeyboard });
+    await ctx.editMessageText(resultText, { parse_mode: 'HTML', ...afterScratchKeyboard });
     delete ctx.session.scratchMsgId;
   } else {
     await ctx.reply(`🍀 You scratched a card and got ${prize.fruit} – $${prize.value.toFixed(2)}\nBalance: $${((user.points + pointsEarned)/100).toFixed(2)}`, getMainMenu());
@@ -262,8 +253,12 @@ bot.action('play_again', async (ctx) => {
   await ctx.answerCbQuery();
   await ctx.telegram.sendMessage(ctx.chat.id, '/scratch');
 });
+bot.action('menu_show', async (ctx) => {
+  await ctx.answerCbQuery();
+  await ctx.telegram.sendMessage(ctx.chat.id, '/menu');
+});
 
-// --------------------- Referral (Inline Button) ---------------------
+// --------------------- Referral (Inline Share Button) ---------------------
 bot.command('referral', async (ctx) => {
   const userId = ctx.from.id;
   const user = await getUser(userId);
@@ -271,11 +266,11 @@ bot.command('referral', async (ctx) => {
 
   const link = `https://t.me/${botUsername}?start=ref_${userId}`;
   const shareText = `🎁 Earn free scratch cards! Join India Scratch & Win using my link: ${link}`;
-
   const shareButton = Markup.inlineKeyboard([
     [Markup.button.url('📤 Share Referral Link', `https://t.me/share/url?url=${encodeURIComponent(shareText)}`)]
   ]);
   await ctx.reply(`<b>🔗 Your Referral Link</b>\n${link}\n\nClick the button below to share it with friends!\n\n<i>Each friend who joins gives you +1 scratch card!</i>`, { parse_mode: 'HTML', ...shareButton });
+  await ctx.reply('Main Menu:', getMainMenu());
 });
 
 // --------------------- Withdrawal ---------------------
@@ -318,7 +313,6 @@ bot.on('text', async (ctx) => {
     await User.updateOne({ user_id: userId }, { $set: { points: 0 } });
     await new Transaction({ user_id: userId, amount: -amount, type: 'withdraw', details: `Withdrawal $${amount.toFixed(2)} to UPI ${upi}` }).save();
 
-    // Save withdrawal request
     const withdrawal = new Withdrawal({
       user_id: userId,
       name: user.name,
@@ -327,7 +321,6 @@ bot.on('text', async (ctx) => {
     });
     await withdrawal.save();
 
-    // Send to admin channel
     if (ADMIN_CHANNEL_ID) {
       const msg = `<b>💰 Withdrawal Request</b>\n\n<b>User:</b> ${escapeHtml(user.name)} (ID: ${userId})\n<b>Amount:</b> $${amount.toFixed(2)}\n<b>UPI ID:</b> ${upi}\n<b>Time:</b> ${new Date().toLocaleString()}`;
       await ctx.telegram.sendMessage(ADMIN_CHANNEL_ID, msg, { parse_mode: 'HTML' });
@@ -403,7 +396,7 @@ bot.command('help', async (ctx) => {
   await ctx.reply(text, { parse_mode: 'HTML', ...getMainMenu() });
 });
 
-// --------------------- Menu command ---------------------
+// --------------------- Menu Command ---------------------
 bot.command('menu', async (ctx) => {
   await ctx.reply('Main Menu:', getMainMenu());
 });
