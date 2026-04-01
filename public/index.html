@@ -1,20 +1,72 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Casino</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-</head>
-<body style="text-align:center;font-family:sans-serif">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Casino</title>
 
-<h1>🎰 Spin Game</h1>
+<style>
+body{
+  text-align:center;
+  font-family:sans-serif;
+  background:black;
+  color:white;
+}
+
+.slot{
+  display:flex;
+  justify-content:center;
+  margin:20px;
+}
+
+.reel{
+  width:80px;
+  height:100px;
+  overflow:hidden;
+  border:2px solid gold;
+  margin:5px;
+  font-size:50px;
+}
+
+.reel div{
+  height:100px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.spin{
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin{
+  0%{transform:translateY(0)}
+  100%{transform:translateY(-300%)}
+}
+
+button{
+  padding:10px 20px;
+  font-size:18px;
+}
+</style>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+
+<body>
+
+<h1>🎰 Casino</h1>
 
 <h2 id="coins">Coins: 0</h2>
 
-<div id="slot" style="font-size:40px">🍒 | 🍒 | 🍒</div>
+<div class="slot">
+  <div class="reel" id="r1"></div>
+  <div class="reel" id="r2"></div>
+  <div class="reel" id="r3"></div>
+</div>
 
 <button onclick="spin()">SPIN</button>
-<button onclick="withdraw()">Withdraw</button>
 
 <script src="script.js"></script>
+
 </body>
 </html>
