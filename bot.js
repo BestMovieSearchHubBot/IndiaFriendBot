@@ -1,4 +1,4 @@
-// India Scratch & Win Bot – Custom Menu Layout
+// India Scratch & Win Bot – Reply Keyboard (Bottom Menu)
 require('dotenv').config();
 const { Telegraf, session, Markup } = require('telegraf');
 const mongoose = require('mongoose');
@@ -120,19 +120,12 @@ bot.use(session());
 let botUsername = '';
 bot.telegram.getMe().then(info => { botUsername = info.username; });
 
-// --------------------- Custom Menu Layout ---------------------
-function getMainMenu() {
-  return Markup.inlineKeyboard([
-    [
-      Markup.button.callback('🎲 Scratch', 'menu_scratch'),
-      Markup.button.callback('👥 Referral', 'menu_referral')
-    ],
-    [
-      Markup.button.callback('💰 Balance', 'menu_balance'),
-      Markup.button.callback('🏆 Leaderboard', 'menu_leaderboard'),
-      Markup.button.callback('💸 Withdraw', 'menu_withdraw')
-    ]
-  ]);
+// --------------------- Reply Keyboard (Bottom Menu) ---------------------
+function getMainMenuKeyboard() {
+  return Markup.keyboard([
+    ['🎲 Scratch', '👥 Referral'],
+    ['💰 Balance', '🏆 Leaderboard', '💸 Withdraw']
+  ]).resize();
 }
 
 // --------------------- Start / Registration ---------------------
@@ -151,7 +144,7 @@ bot.start(async (ctx) => {
   if (user) {
     await ctx.reply(
       `🎉 Welcome back, <b>${escapeHtml(user.name || ctx.from.first_name)}</b>!\nYou have ${user.cards} scratch cards.\nBalance: $${(user.points/100).toFixed(2)}`,
-      { parse_mode: 'HTML', ...getMainMenu() }
+      { parse_mode: 'HTML', ...getMainMenuKeyboard() }
     );
   } else {
     user = new User({
@@ -171,30 +164,25 @@ bot.start(async (ctx) => {
 
     await ctx.reply(
       `✨ Welcome, <b>${escapeHtml(ctx.from.first_name)}</b>! You have received <b>1 free scratch card</b>.\n\nUse the menu below to play!`,
-      { parse_mode: 'HTML', ...getMainMenu() }
+      { parse_mode: 'HTML', ...getMainMenuKeyboard() }
     );
   }
 });
 
-// --------------------- Menu Actions ---------------------
-bot.action('menu_scratch', async (ctx) => {
-  await ctx.answerCbQuery();
+// --------------------- Handle Text Commands from Keyboard ---------------------
+bot.hears('🎲 Scratch', async (ctx) => {
   await ctx.telegram.sendMessage(ctx.chat.id, '/scratch');
 });
-bot.action('menu_referral', async (ctx) => {
-  await ctx.answerCbQuery();
+bot.hears('👥 Referral', async (ctx) => {
   await ctx.telegram.sendMessage(ctx.chat.id, '/referral');
 });
-bot.action('menu_balance', async (ctx) => {
-  await ctx.answerCbQuery();
+bot.hears('💰 Balance', async (ctx) => {
   await ctx.telegram.sendMessage(ctx.chat.id, '/balance');
 });
-bot.action('menu_leaderboard', async (ctx) => {
-  await ctx.answerCbQuery();
+bot.hears('🏆 Leaderboard', async (ctx) => {
   await ctx.telegram.sendMessage(ctx.chat.id, '/leaderboard');
 });
-bot.action('menu_withdraw', async (ctx) => {
-  await ctx.answerCbQuery();
+bot.hears('💸 Withdraw', async (ctx) => {
   await ctx.telegram.sendMessage(ctx.chat.id, '/withdraw');
 });
 
@@ -202,9 +190,9 @@ bot.action('menu_withdraw', async (ctx) => {
 bot.command('scratch', async (ctx) => {
   const userId = ctx.from.id;
   const user = await getUser(userId);
-  if (!user) return ctx.reply('Please /start first.', getMainMenu());
+  if (!user) return ctx.reply('Please /start first.', getMainMenuKeyboard());
   if (user.cards <= 0) {
-    return ctx.reply('You have no scratch cards left. Get more by referring friends (/referral) or buying cards with stars (/buy).', getMainMenu());
+    return ctx.reply('You have no scratch cards left. Get more by referring friends (/referral) or buying cards with stars (/buy).', getMainMenuKeyboard());
   }
 
   const cardButtons = [];
@@ -244,7 +232,7 @@ bot.action(/scratch_\d+/, async (ctx) => {
     await ctx.editMessageText(resultText, { parse_mode: 'HTML', ...afterScratchKeyboard });
     delete ctx.session.scratchMsgId;
   } else {
-    await ctx.reply(`🍀 You scratched a card and got ${prize.fruit} – $${prize.value.toFixed(2)}\nBalance: $${((user.points + pointsEarned)/100).toFixed(2)}`, getMainMenu());
+    await ctx.reply(`🍀 You scratched a card and got ${prize.fruit} – $${prize.value.toFixed(2)}\nBalance: $${((user.points + pointsEarned)/100).toFixed(2)}`, getMainMenuKeyboard());
   }
   await ctx.answerCbQuery();
 });
@@ -262,7 +250,7 @@ bot.action('menu_show', async (ctx) => {
 bot.command('referral', async (ctx) => {
   const userId = ctx.from.id;
   const user = await getUser(userId);
-  if (!user) return ctx.reply('Please /start first.', getMainMenu());
+  if (!user) return ctx.reply('Please /start first.', getMainMenuKeyboard());
 
   const link = `https://t.me/${botUsername}?start=ref_${userId}`;
   const shareText = `🎁 Earn free scratch cards! Join India Scratch & Win using my link: ${link}`;
@@ -270,18 +258,18 @@ bot.command('referral', async (ctx) => {
     [Markup.button.url('📤 Share Referral Link', `https://t.me/share/url?url=${encodeURIComponent(shareText)}`)]
   ]);
   await ctx.reply(`<b>🔗 Your Referral Link</b>\n${link}\n\nClick the button below to share it with friends!\n\n<i>Each friend who joins gives you +1 scratch card!</i>`, { parse_mode: 'HTML', ...shareButton });
-  await ctx.reply('Main Menu:', getMainMenu());
+  await ctx.reply('Main Menu:', getMainMenuKeyboard());
 });
 
 // --------------------- Withdrawal ---------------------
 bot.command('withdraw', async (ctx) => {
   const userId = ctx.from.id;
   const user = await getUser(userId);
-  if (!user) return ctx.reply('Please /start first.', getMainMenu());
+  if (!user) return ctx.reply('Please /start first.', getMainMenuKeyboard());
 
   const balance = user.points / 100;
   if (balance < 10) {
-    return ctx.reply(`Minimum withdrawal is $10. Your current balance is $${balance.toFixed(2)}. Keep scratching!`, getMainMenu());
+    return ctx.reply(`Minimum withdrawal is $10. Your current balance is $${balance.toFixed(2)}. Keep scratching!`, getMainMenuKeyboard());
   }
 
   ctx.session.withdrawState = 'awaiting_upi';
@@ -294,7 +282,7 @@ bot.on('text', async (ctx) => {
     const user = await getUser(userId);
     if (!user) {
       ctx.session.withdrawState = null;
-      return ctx.reply('Please /start first.', getMainMenu());
+      return ctx.reply('Please /start first.', getMainMenuKeyboard());
     }
 
     const upi = ctx.message.text.trim();
@@ -306,7 +294,7 @@ bot.on('text', async (ctx) => {
     const amount = user.points / 100;
     if (amount < 10) {
       ctx.session.withdrawState = null;
-      return ctx.reply(`Minimum withdrawal is $10. Your current balance is $${amount.toFixed(2)}.`, getMainMenu());
+      return ctx.reply(`Minimum withdrawal is $10. Your current balance is $${amount.toFixed(2)}.`, getMainMenuKeyboard());
     }
 
     // Deduct points
@@ -328,7 +316,7 @@ bot.on('text', async (ctx) => {
       console.log('ADMIN_CHANNEL_ID not set. Withdrawal request:', { user: user.name, amount, upi });
     }
 
-    await ctx.reply(`✅ Withdrawal request of $${amount.toFixed(2)} submitted. Our team will process it soon. Your balance is now $0.`, getMainMenu());
+    await ctx.reply(`✅ Withdrawal request of $${amount.toFixed(2)} submitted. Our team will process it soon. Your balance is now $0.`, getMainMenuKeyboard());
     ctx.session.withdrawState = null;
   }
 });
@@ -363,7 +351,7 @@ bot.on('successful_payment', async (ctx) => {
   const payload = ctx.message.successful_payment.invoice_payload;
   if (payload === 'buy_5cards') {
     await addCards(userId, 5, 'purchase');
-    await ctx.reply('✅ You purchased 5 scratch cards! Use /scratch to play.', getMainMenu());
+    await ctx.reply('✅ You purchased 5 scratch cards! Use /scratch to play.', getMainMenuKeyboard());
   }
 });
 
@@ -371,9 +359,9 @@ bot.on('successful_payment', async (ctx) => {
 bot.command('balance', async (ctx) => {
   const userId = ctx.from.id;
   const user = await getUser(userId);
-  if (!user) return ctx.reply('Please /start first.', getMainMenu());
+  if (!user) return ctx.reply('Please /start first.', getMainMenuKeyboard());
   const text = `<b>💰 Your Stats</b>\nCards: ${user.cards}\nTotal earned: $${(user.points/100).toFixed(2)}\nInvites: ${user.referrals_count}`;
-  await ctx.reply(text, { parse_mode: 'HTML', ...getMainMenu() });
+  await ctx.reply(text, { parse_mode: 'HTML', ...getMainMenuKeyboard() });
 });
 
 bot.command('leaderboard', async (ctx) => {
@@ -387,18 +375,18 @@ bot.command('leaderboard', async (ctx) => {
   for (let i = 0; i < topRefs.length; i++) {
     refsText += `${i+1}. ${escapeHtml(topRefs[i].name)} – ${topRefs[i].referrals_count} invites\n`;
   }
-  await ctx.reply(`${earnersText}\n${refsText}`, { parse_mode: 'HTML', ...getMainMenu() });
+  await ctx.reply(`${earnersText}\n${refsText}`, { parse_mode: 'HTML', ...getMainMenuKeyboard() });
 });
 
 // --------------------- Help ---------------------
 bot.command('help', async (ctx) => {
   const text = `<b>🎮 Commands</b>\n/scratch – Scratch a card\n/buy – Buy more cards with Stars\n/referral – Invite friends & earn cards\n/withdraw – Request withdrawal (min $10)\n/balance – Your stats\n/leaderboard – Top players\n/menu – Show main menu\n\n<b>How to win:</b> Each card gives a random fruit worth $0.25 to $2. Collect points and compete on the leaderboard!`;
-  await ctx.reply(text, { parse_mode: 'HTML', ...getMainMenu() });
+  await ctx.reply(text, { parse_mode: 'HTML', ...getMainMenuKeyboard() });
 });
 
 // --------------------- Menu Command ---------------------
 bot.command('menu', async (ctx) => {
-  await ctx.reply('Main Menu:', getMainMenu());
+  await ctx.reply('Main Menu:', getMainMenuKeyboard());
 });
 
 // --------------------- Webhook ---------------------
