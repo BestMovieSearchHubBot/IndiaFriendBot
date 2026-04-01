@@ -2,35 +2,51 @@ require('dotenv').config();
 const express = require('express');
 const { Telegraf } = require('telegraf');
 const mongoose = require('mongoose');
-const path = require('path');
 
 const app = express();
 app.use(express.json());
 app.use(express.static('public'));
 
-// ENV
+// ===== ENV =====
 const BOT_TOKEN = process.env.BOT_TOKEN;
-const MONGO = process.env.MONGODB_URI;
+const MONGODB_URI = process.env.MONGODB_URI;
+const WEBHOOK_URL = process.env.WEBHOOK_URL;
+const WEBAPP_URL = process.env.WEBAPP_URL;
+const PORT = process.env.PORT || 3000;
 
-// DB
-mongoose.connect(MONGO);
-console.log("DB Connected");
+// ===== DEBUG =====
+console.log("WEBHOOK:", WEBHOOK_URL);
+console.log("WEBAPP:", WEBAPP_URL);
 
-// MODEL
+// ===== DB =====
+mongoose.connect(MONGODB_URI)
+.then(()=> console.log("✅ MongoDB Connected"))
+.catch(err => console.log("❌ DB Error:", err));
+
+// ===== MODEL =====
 const User = mongoose.model('User', new mongoose.Schema({
   user_id:Number,
   coins:{type:Number,default:100}
 }));
 
-// BOT
+// ===== BOT =====
 const bot = new Telegraf(BOT_TOKEN);
 
-// START → OPEN MINI APP
+// ===== START BUTTON (FIXED) =====
 bot.start((ctx)=>{
+  if (!WEBAPP_URL) {
+    return ctx.reply("❌ WEBAPP_URL not set");
+  }
+
   ctx.reply("🎰 Open Casino", {
-    reply_markup:{
-      inline_keyboard:[
-        [{ text:"🎰 PLAY", web_app:{ url: process.env.WEBAPP_URL } }]
+    reply_markup: {
+      inline_keyboard: [
+        [
+          {
+            text: "🎰 PLAY",
+            web_app: { url: WEBAPP_URL }
+          }
+        ]
       ]
     }
   });
@@ -40,54 +56,56 @@ bot.start((ctx)=>{
 
 // GET USER
 app.get('/user/:id', async (req,res)=>{
-  let u = await User.findOne({ user_id:req.params.id });
-  if(!u) u = await User.create({ user_id:req.params.id });
-  res.json(u);
+  let user = await User.findOne({ user_id:req.params.id });
+  if(!user) user = await User.create({ user_id:req.params.id });
+  res.json(user);
 });
 
 // SPIN
 app.post('/spin', async (req,res)=>{
   const { user_id } = req.body;
 
-  let u = await User.findOne({ user_id });
-  if(!u) u = await User.create({ user_id });
+  let user = await User.findOne({ user_id });
+  if(!user) user = await User.create({ user_id });
 
-  const items = ["🍎","🍊","🍇","🍒"];
+  const items = ["🍎","🍊","🍇","🍒","🍉"];
   const r = [
-    items[Math.floor(Math.random()*4)],
-    items[Math.floor(Math.random()*4)],
-    items[Math.floor(Math.random()*4)]
+    items[Math.floor(Math.random()*items.length)],
+    items[Math.floor(Math.random()*items.length)],
+    items[Math.floor(Math.random()*items.length)]
   ];
 
   let win = 0;
   if(r[0]==r[1] && r[1]==r[2]) win = 50;
   else if(r[0]==r[1] || r[1]==r[2]) win = 10;
 
-  u.coins += win;
-  await u.save();
+  user.coins += win;
+  await user.save();
 
-  res.json({ result:r, win, coins:u.coins });
+  res.json({ result:r, win, coins:user.coins });
 });
 
 // WITHDRAW
 app.post('/withdraw', async (req,res)=>{
   const { user_id } = req.body;
 
-  let u = await User.findOne({ user_id });
-  if(u.coins < 500) return res.json({ ok:false });
+  let user = await User.findOne({ user_id });
 
-  u.coins -= 500;
-  await u.save();
+  if(user.coins < 500){
+    return res.json({ ok:false, msg:"Not enough coins" });
+  }
+
+  user.coins -= 500;
+  await user.save();
 
   res.json({ ok:true });
 });
 
-// ADMIN PANEL DATA
-app.get('/admin/users', async (req,res)=>{
-  const users = await User.find().sort({ coins:-1 }).limit(50);
-  res.json(users);
-});
+// ===== SERVER START =====
+app.listen(PORT, ()=> console.log("🌐 Server running"));
 
-// START SERVER
-app.listen(3000, ()=> console.log("Server Running"));
-bot.launch();
+// ===== WEBHOOK =====
+bot.telegram.setWebhook(`${WEBHOOK_URL}/webhook`);
+app.use(bot.webhookCallback('/webhook'));
+
+console.log("🤖 Bot running...");
