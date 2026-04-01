@@ -1,4 +1,4 @@
-// India Scratch & Win Bot – Stable Version with Reply Keyboard
+// India Scratch & Win Bot – Stable with Safe Session Handling
 require('dotenv').config();
 const { Telegraf, session, Markup } = require('telegraf');
 const mongoose = require('mongoose');
@@ -157,6 +157,8 @@ bot.start(async (ctx) => {
     if (args.length > 1 && args[1].startsWith('ref_')) {
       referrerId = parseInt(args[1].slice(4));
       if (!isNaN(referrerId) && referrerId !== userId) {
+        // Ensure session exists
+        if (!ctx.session) ctx.session = {};
         ctx.session.referred_by = referrerId;
       }
     }
@@ -173,7 +175,7 @@ bot.start(async (ctx) => {
         name: ctx.from.first_name,
         cards: 1,
         points: 0,
-        referred_by: ctx.session.referred_by || null
+        referred_by: ctx.session?.referred_by || null
       });
       await user.save();
 
@@ -214,6 +216,9 @@ bot.hears('Withdraw', async (ctx) => {
 // --------------------- Scratch Card ---------------------
 bot.command('scratch', async (ctx) => {
   try {
+    // Ensure session exists
+    if (!ctx.session) ctx.session = {};
+
     const userId = ctx.from.id;
     const user = await getUser(userId);
     if (!user) return ctx.reply('Please /start first.', getMainMenuKeyboard());
@@ -253,7 +258,7 @@ bot.action(/scratch_\d+/, async (ctx) => {
     const pointsEarned = Math.round(prize.value * 100);
     await addPoints(userId, pointsEarned, `Won ${prize.fruit}`);
 
-    const scratchMsgId = ctx.session.scratchMsgId;
+    const scratchMsgId = ctx.session?.scratchMsgId;
     if (scratchMsgId) {
       const resultText = `🍀 <b>You scratched a card and got:</b>\n${prize.fruit} – $${prize.value.toFixed(2)}\n\n<b>New balance:</b> $${((user.points + pointsEarned)/100).toFixed(2)}\n<b>Cards left:</b> ${user.cards-1}`;
       const afterScratchKeyboard = Markup.inlineKeyboard([
@@ -261,7 +266,7 @@ bot.action(/scratch_\d+/, async (ctx) => {
         [Markup.button.callback('🏠 Main Menu', 'menu_show')]
       ]);
       await ctx.editMessageText(resultText, { parse_mode: 'HTML', ...afterScratchKeyboard });
-      delete ctx.session.scratchMsgId;
+      if (ctx.session) delete ctx.session.scratchMsgId;
     } else {
       await ctx.reply(`🍀 You scratched a card and got ${prize.fruit} – $${prize.value.toFixed(2)}\nBalance: $${((user.points + pointsEarned)/100).toFixed(2)}`, getMainMenuKeyboard());
     }
@@ -304,6 +309,8 @@ bot.command('referral', async (ctx) => {
 // --------------------- Withdrawal ---------------------
 bot.command('withdraw', async (ctx) => {
   try {
+    if (!ctx.session) ctx.session = {};
+
     const userId = ctx.from.id;
     const user = await getUser(userId);
     if (!user) return ctx.reply('Please /start first.', getMainMenuKeyboard());
@@ -322,6 +329,9 @@ bot.command('withdraw', async (ctx) => {
 });
 
 bot.on('text', async (ctx) => {
+  // Ensure session exists
+  if (!ctx.session) ctx.session = {};
+
   if (ctx.session.withdrawState === 'awaiting_upi') {
     try {
       const userId = ctx.from.id;
@@ -469,7 +479,7 @@ bot.command('menu', async (ctx) => {
   await ctx.reply('Main Menu:', getMainMenuKeyboard());
 });
 
-// --------------------- Health Check (prevents Render 403 on root) ---------------------
+// --------------------- Health Check & Webhook ---------------------
 bot.telegram.setWebhook(`${WEBHOOK_URL}/webhook`).then(() => console.log('Webhook set'));
 bot.startWebhook('/webhook', null, PORT);
 console.log(`Bot listening on port ${PORT}`);
