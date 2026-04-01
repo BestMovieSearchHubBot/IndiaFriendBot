@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lucky Gems</title>
+<title>Lucky Gems Slot</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
 
@@ -10,7 +10,7 @@
 body{
   margin:0;
   font-family:'Orbitron',sans-serif;
-  background:url('bg.jpg') no-repeat center -0%/cover;
+  background:url('bg.jpg') no-repeat center/cover;
 }
 
 /* TOP */
@@ -25,6 +25,7 @@ body{
   background:#111;
   padding:5px 15px;
   border-radius:20px;
+  color:white;
 }
 
 /* MACHINE */
@@ -50,10 +51,10 @@ body{
   top:70px;
   left:25px;
   width:270px;
-  height:270px;
+  height:210px; /* 3 gems visible */
   display:flex;
   justify-content:space-between;
-  overflow:hidden;
+  overflow:hidden; 
   z-index:2;
 }
 
@@ -85,6 +86,8 @@ body{
   background:purple;
   padding:15px;
   border-radius:10px;
+  color:white;
+  text-align:center;
 }
 
 /* CONTROLS */
@@ -139,6 +142,5 @@ body{
 </div>
 
 <script src="script.js"></script>
-
 </body>
 </html>
