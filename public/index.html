@@ -2,69 +2,101 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Casino Pro</title>
+<title>Lucky Gems</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
 
 <style>
 body{
   margin:0;
-  background:#0b1d0b;
-  font-family:sans-serif;
-  text-align:center;
-  color:#fff;
+  font-family: 'Orbitron', sans-serif;
+  background:url('bg.jpg') no-repeat center/cover;
+  color:white;
 }
 
 /* TOP BAR */
-.top{
+.topbar{
+  display:flex;
+  justify-content:space-between;
   padding:10px;
+  background:rgba(0,0,0,0.6);
+}
+
+.coins{
   background:#111;
-  font-size:20px;
+  padding:5px 15px;
+  border-radius:20px;
 }
 
 /* GRID */
 .grid{
   display:grid;
-  grid-template-columns: repeat(3, 90px);
+  grid-template-columns:repeat(3,90px);
   gap:10px;
   justify-content:center;
-  margin-top:40px;
+  margin-top:30px;
 }
 
 /* BOX */
 .box{
   width:90px;
   height:90px;
-  background:gold;
+  background:linear-gradient(#ffd700,#b8860b);
   border-radius:10px;
   overflow:hidden;
   position:relative;
-  font-size:40px;
 }
 
-/* FALL ITEM */
+/* GEM */
 .item{
   position:absolute;
   top:-100px;
   width:100%;
   height:100%;
+  font-size:40px;
   display:flex;
   align-items:center;
   justify-content:center;
-  transition: top 0.6s ease;
+  transition: top 0.5s ease;
 }
 
-/* FINAL POSITION */
 .show{
   top:0;
 }
 
-/* BUTTON */
-button{
-  margin-top:30px;
-  padding:15px 40px;
-  font-size:20px;
-  background:orange;
-  border:none;
+/* SIDEBAR */
+.sidebar{
+  position:absolute;
+  right:10px;
+  top:100px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.sidebtn{
+  background:purple;
+  padding:15px;
   border-radius:10px;
+  text-align:center;
+}
+
+/* CONTROLS */
+.controls{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  background:rgba(0,0,0,0.7);
+  display:flex;
+  justify-content:space-around;
+  padding:10px;
+}
+
+.spin{
+  background:orange;
+  padding:15px 30px;
+  border-radius:50px;
+  font-size:20px;
 }
 
 </style>
@@ -74,11 +106,25 @@ button{
 
 <body>
 
-<div class="top">🎰 Coins: <span id="coins">0</span></div>
+<div class="topbar">
+  <div>👤 Player</div>
+  <div class="coins">💰 <span id="coins">0</span></div>
+</div>
 
 <div class="grid" id="grid"></div>
 
-<button onclick="spin()">SPIN</button>
+<div class="sidebar">
+  <div class="sidebtn">🎁 Bonus</div>
+  <div class="sidebtn">500x</div>
+  <div class="sidebtn">100x</div>
+</div>
+
+<div class="controls">
+  <div>-</div>
+  <div>BET 1</div>
+  <div>+</div>
+  <div class="spin" onclick="spin()">SPIN</div>
+</div>
 
 <script src="script.js"></script>
 
