@@ -2,15 +2,15 @@ const tg = window.Telegram.WebApp;
 const user = tg.initDataUnsafe.user;
 const user_id = user.id;
 
-const fruits = ["💎","🟢","🔷","🔴","🟡"];
-
 const grid = document.getElementById("grid");
 
-// CREATE 9 BOXES
+const gems = ["💎","🟢","🔷","🔴","🟡"];
+
+// CREATE GRID
 for(let i=0;i<9;i++){
   let box = document.createElement("div");
-  box.className = "box";
-  box.id = "b"+i;
+  box.className="box";
+  box.id="b"+i;
   grid.appendChild(box);
 }
 
@@ -22,10 +22,9 @@ async function load(){
 }
 load();
 
-// SPIN FUNCTION
+// SPIN
 async function spin(){
 
-  // backend result
   let res = await fetch('/spin',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
@@ -34,31 +33,27 @@ async function spin(){
 
   let data = await res.json();
 
-  let result = data.result;
-
-  // CLEAR BOXES
+  // clear
   for(let i=0;i<9;i++){
     document.getElementById("b"+i).innerHTML="";
   }
 
-  // FALL ANIMATION
+  // animation
   for(let i=0;i<9;i++){
 
     let item = document.createElement("div");
-    item.className = "item";
-    item.innerText = result[i % 3]; // repeat pattern
+    item.className="item";
+    item.innerText = data.result[i%3];
 
     let box = document.getElementById("b"+i);
     box.appendChild(item);
 
-    // delay for each box
     setTimeout(()=>{
       item.classList.add("show");
-    }, i * 100); // stagger effect
+    }, i*100);
   }
 
-  // update coins
   setTimeout(()=>{
     document.getElementById("coins").innerText = data.coins;
-  },1000);
+  },800);
 }
