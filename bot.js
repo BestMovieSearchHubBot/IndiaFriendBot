@@ -1,4 +1,4 @@
-// India Scratch & Win Bot – Reply Keyboard (Bottom Menu)
+// India Scratch & Win Bot – Reply Keyboard (No Emojis)
 require('dotenv').config();
 const { Telegraf, session, Markup } = require('telegraf');
 const mongoose = require('mongoose');
@@ -120,11 +120,11 @@ bot.use(session());
 let botUsername = '';
 bot.telegram.getMe().then(info => { botUsername = info.username; });
 
-// --------------------- Reply Keyboard (Bottom Menu) ---------------------
+// --------------------- Reply Keyboard (exactly as in screenshot) ---------------------
 function getMainMenuKeyboard() {
   return Markup.keyboard([
-    ['🎲 Scratch', '👥 Referral'],
-    ['💰 Balance', '🏆 Leaderboard', '💸 Withdraw']
+    ['Scratch', 'Referral'],
+    ['Balance', 'Leaderboard', 'Withdraw']
   ]).resize();
 }
 
@@ -169,24 +169,24 @@ bot.start(async (ctx) => {
   }
 });
 
-// --------------------- Handle Text Commands from Keyboard ---------------------
-bot.hears('🎲 Scratch', async (ctx) => {
+// --------------------- Handle Keyboard Button Clicks ---------------------
+bot.hears('Scratch', async (ctx) => {
   await ctx.telegram.sendMessage(ctx.chat.id, '/scratch');
 });
-bot.hears('👥 Referral', async (ctx) => {
+bot.hears('Referral', async (ctx) => {
   await ctx.telegram.sendMessage(ctx.chat.id, '/referral');
 });
-bot.hears('💰 Balance', async (ctx) => {
+bot.hears('Balance', async (ctx) => {
   await ctx.telegram.sendMessage(ctx.chat.id, '/balance');
 });
-bot.hears('🏆 Leaderboard', async (ctx) => {
+bot.hears('Leaderboard', async (ctx) => {
   await ctx.telegram.sendMessage(ctx.chat.id, '/leaderboard');
 });
-bot.hears('💸 Withdraw', async (ctx) => {
+bot.hears('Withdraw', async (ctx) => {
   await ctx.telegram.sendMessage(ctx.chat.id, '/withdraw');
 });
 
-// --------------------- Scratch Card ---------------------
+// --------------------- Scratch Card (Inline Card Selection) ---------------------
 bot.command('scratch', async (ctx) => {
   const userId = ctx.from.id;
   const user = await getUser(userId);
@@ -246,7 +246,7 @@ bot.action('menu_show', async (ctx) => {
   await ctx.telegram.sendMessage(ctx.chat.id, '/menu');
 });
 
-// --------------------- Referral (Inline Share Button) ---------------------
+// --------------------- Referral ---------------------
 bot.command('referral', async (ctx) => {
   const userId = ctx.from.id;
   const user = await getUser(userId);
@@ -380,7 +380,7 @@ bot.command('leaderboard', async (ctx) => {
 
 // --------------------- Help ---------------------
 bot.command('help', async (ctx) => {
-  const text = `<b>🎮 Commands</b>\n/scratch – Scratch a card\n/buy – Buy more cards with Stars\n/referral – Invite friends & earn cards\n/withdraw – Request withdrawal (min $10)\n/balance – Your stats\n/leaderboard – Top players\n/menu – Show main menu\n\n<b>How to win:</b> Each card gives a random fruit worth $0.25 to $2. Collect points and compete on the leaderboard!`;
+  const text = `<b>🎮 Commands</b>\n/scratch – Scratch a card\n/buy – Buy more cards with Stars\n/referral – Invite friends & earn cards\n/withdraw – Request withdrawal (min $10)\n/balance – Your stats\n/leaderboard – Top players\n\n<b>How to win:</b> Each card gives a random fruit worth $0.25 to $2. Collect points and compete on the leaderboard!`;
   await ctx.reply(text, { parse_mode: 'HTML', ...getMainMenuKeyboard() });
 });
 
