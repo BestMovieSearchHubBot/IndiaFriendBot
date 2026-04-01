@@ -1,4 +1,4 @@
-// India Scratch & Win Bot – Viral & Free-Tier Friendly
+// India Scratch & Win Bot – Viral & Free-Tier Friendly (HTML version)
 require('dotenv').config();
 const { Telegraf, session, Markup } = require('telegraf');
 const mongoose = require('mongoose');
@@ -22,8 +22,8 @@ db.once('open', () => {
 const userSchema = new mongoose.Schema({
   user_id: { type: Number, unique: true, required: true },
   name: { type: String, default: '' },
-  cards: { type: Number, default: 1 },          // free scratch cards
-  points: { type: Number, default: 0 },         // total earned (in cents)
+  cards: { type: Number, default: 1 },
+  points: { type: Number, default: 0 },
   referrals_count: { type: Number, default: 0 },
   referred_by: { type: Number, default: null },
   created_at: { type: Date, default: Date.now }
@@ -34,8 +34,8 @@ userSchema.index({ points: -1 });
 
 const transactionSchema = new mongoose.Schema({
   user_id: Number,
-  amount: Number,        // positive = added, negative = spent (stars)
-  type: String,          // 'purchase', 'referral_bonus', 'scratch_win'
+  amount: Number,
+  type: String,
   details: String,
   timestamp: { type: Date, default: Date.now }
 });
@@ -61,7 +61,17 @@ function getRandomPrize() {
   return prizes[idx];
 }
 
-// Helper: add points (cents) and record transaction
+// Helper: escape HTML special characters
+function escapeHtml(text) {
+  if (!text) return '';
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 async function addPoints(userId, points, reason) {
   const user = await User.findOneAndUpdate(
     { user_id: userId },
@@ -72,7 +82,6 @@ async function addPoints(userId, points, reason) {
   return user;
 }
 
-// Helper: add cards and record transaction
 async function addCards(userId, cards, reason, relatedUserId = null) {
   const user = await User.findOneAndUpdate(
     { user_id: userId },
@@ -114,7 +123,7 @@ bot.start(async (ctx) => {
 
   let user = await getUser(userId);
   if (user) {
-    await ctx.reply(`🎉 Welcome back, ${user.name || ctx.from.first_name}!\nYou have ${user.cards} scratch cards.\nBalance: $${(user.points/100).toFixed(2)}`);
+    await ctx.reply(`🎉 Welcome back, <b>${escapeHtml(user.name || ctx.from.first_name)}</b>!\nYou have ${user.cards} scratch cards.\nBalance: $${(user.points/100).toFixed(2)}`, { parse_mode: 'HTML' });
   } else {
     // Create new user with 1 free card
     user = new User({
@@ -129,12 +138,16 @@ bot.start(async (ctx) => {
     // Reward referrer with 1 card
     if (user.referred_by) {
       await addCards(user.referred_by, 1, 'referral_bonus', userId);
-      // Increment referrer's referrals_count
       await User.updateOne({ user_id: user.referred_by }, { $inc: { referrals_count: 1 } });
-      await ctx.telegram.sendMessage(user.referred_by, `🎁 You got 1 extra scratch card because ${ctx.from.first_name} joined using your link!`);
+      await ctx.telegram.sendMessage(user.referred_by, `🎁 You got 1 extra scratch card because <b>${escapeHtml(ctx.from.first_name)}</b> joined using your link!`, { parse_mode: 'HTML' });
     }
 
-    await ctx.reply(`✨ Welcome, ${ctx.from.first_name}! You have received **1 free scratch card**.\n\nUse /scratch to reveal your lucky fruit and win money!\nInvite friends with /referral to get more cards.`);
+    await ctx.reply(
+      `✨ Welcome, <b>${escapeHtml(ctx.from.first_name)}</b>! You have received <b>1 free scratch card</b>.\n\n` +
+      `Use /scratch to reveal your lucky fruit and win money!\n` +
+      `Invite friends with /referral to get more cards.`,
+      { parse_mode: 'HTML' }
+    );
   }
 });
 
@@ -147,7 +160,6 @@ bot.command('scratch', async (ctx) => {
     return ctx.reply('You have no scratch cards left. Get more by referring friends (/referral) or buying cards with stars (/buy).');
   }
 
-  // Build keyboard with 6 card buttons
   const cardButtons = [];
   for (let i = 1; i <= 6; i++) {
     cardButtons.push(Markup.button.callback(`🎴 ${i}`, `scratch_${i}`));
@@ -157,7 +169,6 @@ bot.command('scratch', async (ctx) => {
     cardButtons.slice(3, 6)
   ]);
   const msg = await ctx.reply('👇 Choose a card to scratch!', keyboard);
-  // Store the message ID so we can edit it later
   ctx.session.scratchMsgId = msg.message_id;
 });
 
@@ -177,18 +188,15 @@ bot.action(/scratch_\d+/, async (ctx) => {
   const pointsEarned = Math.round(prize.value * 100);
   await addPoints(userId, pointsEarned, `Won ${prize.fruit}`);
 
-  // Get the original message ID (stored in session)
   const scratchMsgId = ctx.session.scratchMsgId;
   if (scratchMsgId) {
-    // Edit the original message: remove buttons and show the result
-    const resultText = `🍀 *You scratched a card and got:*\n${prize.fruit} – $${prize.value.toFixed(2)}\n\nNew balance: $${((user.points + pointsEarned)/100).toFixed(2)}\nYou have ${user.cards-1} cards left.`;
+    const resultText = `🍀 <b>You scratched a card and got:</b>\n${prize.fruit} – $${prize.value.toFixed(2)}\n\n<b>New balance:</b> $${((user.points + pointsEarned)/100).toFixed(2)}\n<b>Cards left:</b> ${user.cards-1}`;
     const playAgainKeyboard = Markup.inlineKeyboard([
       [Markup.button.callback('🎲 Play Again', 'play_again')]
     ]);
-    await ctx.editMessageText(resultText, { parse_mode: 'Markdown', ...playAgainKeyboard });
+    await ctx.editMessageText(resultText, { parse_mode: 'HTML', ...playAgainKeyboard });
     delete ctx.session.scratchMsgId;
   } else {
-    // Fallback: send new message
     await ctx.reply(`🍀 You scratched a card and got ${prize.fruit} – $${prize.value.toFixed(2)}\nBalance: $${((user.points + pointsEarned)/100).toFixed(2)}`);
   }
   await ctx.answerCbQuery();
@@ -196,11 +204,10 @@ bot.action(/scratch_\d+/, async (ctx) => {
 
 bot.action('play_again', async (ctx) => {
   await ctx.answerCbQuery();
-  // Trigger the /scratch command again
   await ctx.telegram.sendMessage(ctx.chat.id, '/scratch');
 });
 
-// --------------------- Referral System ---------------------
+// --------------------- Referral System (Fixed HTML) ---------------------
 bot.command('referral', async (ctx) => {
   const userId = ctx.from.id;
   const user = await getUser(userId);
@@ -208,12 +215,12 @@ bot.command('referral', async (ctx) => {
 
   const link = `https://t.me/${botUsername}?start=ref_${userId}`;
   const topRefs = await User.find({}).sort({ referrals_count: -1 }).limit(5).lean();
-  let leaderboard = '🏆 *Top Referrers*\n';
+  let leaderboard = '<b>🏆 Top Referrers</b>\n';
   for (let i = 0; i < topRefs.length; i++) {
-    leaderboard += `${i+1}. ${topRefs[i].name} – ${topRefs[i].referrals_count} invites\n`;
+    leaderboard += `${i+1}. ${escapeHtml(topRefs[i].name)} – ${topRefs[i].referrals_count} invites\n`;
   }
-  const text = `🔗 *Your Referral Link*\n${link}\n\n📊 *Stats*\nInvites: ${user.referrals_count}\n\n${leaderboard}\n\n*How it works:*\n- Each friend who joins gives you **+1 scratch card**.\n- Top referrers get featured here!`;
-  await ctx.reply(text, { parse_mode: 'Markdown' });
+  const text = `<b>🔗 Your Referral Link</b>\n${link}\n\n<b>📊 Stats</b>\nInvites: ${user.referrals_count}\n\n${leaderboard}\n\n<b>How it works:</b>\n- Each friend who joins gives you <b>+1 scratch card</b>.\n- Top referrers get featured here!`;
+  await ctx.reply(text, { parse_mode: 'HTML' });
 });
 
 // --------------------- Buy Cards with Stars ---------------------
@@ -221,7 +228,7 @@ bot.command('buy', async (ctx) => {
   const keyboard = Markup.inlineKeyboard([
     [Markup.button.callback('5 Cards – 100⭐', 'buy_5cards')]
   ]);
-  await ctx.reply('🎁 *Buy scratch cards* – 5 cards for 100 stars.\nClick below to purchase:', { parse_mode: 'Markdown', ...keyboard });
+  await ctx.reply('<b>🎁 Buy scratch cards</b> – 5 cards for 100 stars.\nClick below to purchase:', { parse_mode: 'HTML', ...keyboard });
 });
 
 bot.action('buy_5cards', async (ctx) => {
@@ -250,33 +257,33 @@ bot.on('successful_payment', async (ctx) => {
   }
 });
 
-// --------------------- Balance & Leaderboard ---------------------
+// --------------------- Balance & Leaderboard (HTML) ---------------------
 bot.command('balance', async (ctx) => {
   const userId = ctx.from.id;
   const user = await getUser(userId);
   if (!user) return ctx.reply('Please /start first.');
-  const text = `💰 *Your Stats*\nCards: ${user.cards}\nTotal earned: $${(user.points/100).toFixed(2)}\nInvites: ${user.referrals_count}`;
-  await ctx.reply(text, { parse_mode: 'Markdown' });
+  const text = `<b>💰 Your Stats</b>\nCards: ${user.cards}\nTotal earned: $${(user.points/100).toFixed(2)}\nInvites: ${user.referrals_count}`;
+  await ctx.reply(text, { parse_mode: 'HTML' });
 });
 
 bot.command('leaderboard', async (ctx) => {
   const topEarners = await User.find({}).sort({ points: -1 }).limit(5).lean();
-  let earnersText = '🏆 *Top Earners*\n';
+  let earnersText = '<b>🏆 Top Earners</b>\n';
   for (let i = 0; i < topEarners.length; i++) {
-    earnersText += `${i+1}. ${topEarners[i].name} – $${(topEarners[i].points/100).toFixed(2)}\n`;
+    earnersText += `${i+1}. ${escapeHtml(topEarners[i].name)} – $${(topEarners[i].points/100).toFixed(2)}\n`;
   }
   const topRefs = await User.find({}).sort({ referrals_count: -1 }).limit(5).lean();
-  let refsText = '🏆 *Top Referrers*\n';
+  let refsText = '<b>🏆 Top Referrers</b>\n';
   for (let i = 0; i < topRefs.length; i++) {
-    refsText += `${i+1}. ${topRefs[i].name} – ${topRefs[i].referrals_count} invites\n`;
+    refsText += `${i+1}. ${escapeHtml(topRefs[i].name)} – ${topRefs[i].referrals_count} invites\n`;
   }
-  await ctx.reply(`${earnersText}\n${refsText}`, { parse_mode: 'Markdown' });
+  await ctx.reply(`${earnersText}\n${refsText}`, { parse_mode: 'HTML' });
 });
 
 // --------------------- Help ---------------------
 bot.command('help', async (ctx) => {
-  const text = `🎮 *Commands*\n/start – Register & get your first card\n/scratch – Scratch a card\n/buy – Buy more cards with Stars\n/referral – Invite friends & earn cards\n/balance – Your stats\n/leaderboard – Top players\n\n*How to win:* Each card gives a random fruit worth $0.25 to $2. Collect points and compete on the leaderboard!`;
-  await ctx.reply(text, { parse_mode: 'Markdown' });
+  const text = `<b>🎮 Commands</b>\n/start – Register & get your first card\n/scratch – Scratch a card\n/buy – Buy more cards with Stars\n/referral – Invite friends & earn cards\n/balance – Your stats\n/leaderboard – Top players\n\n<b>How to win:</b> Each card gives a random fruit worth $0.25 to $2. Collect points and compete on the leaderboard!`;
+  await ctx.reply(text, { parse_mode: 'HTML' });
 });
 
 // --------------------- Webhook ---------------------
