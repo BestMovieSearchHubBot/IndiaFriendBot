@@ -33,8 +33,7 @@ body{
   width:320px;
   margin:auto;
   margin-top:20px;
-
-  transform: scale(1.3);   /* 👈 yahan change karo */
+  transform: scale(1.3);   
   transform-origin: top center;
 }
 
@@ -52,7 +51,6 @@ body{
   left:25px;
   width:270px;
   height:270px;
-
   display:flex;
   justify-content:space-between;
   overflow:hidden;
@@ -63,7 +61,7 @@ body{
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:1px;   /* 👈 yahin se gap control hota hai */
+  gap:1px;   
 }
 
 .reel img{
@@ -105,6 +103,7 @@ body{
   padding:15px 30px;
   border-radius:50px;
   font-size:18px;
+  cursor:pointer;
 }
 </style>
 
@@ -118,15 +117,12 @@ body{
 </div>
 
 <div class="machine">
-
   <img src="frame.png" class="frame">
-
   <div class="reels">
     <div class="reel" id="r1"></div>
     <div class="reel" id="r2"></div>
     <div class="reel" id="r3"></div>
   </div>
-
 </div>
 
 <div class="sidebar">
