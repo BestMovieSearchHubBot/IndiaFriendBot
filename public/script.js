@@ -1,44 +1,29 @@
 const tg = window.Telegram.WebApp;
 const user = tg.initDataUnsafe.user;
+const user_id = user.id;
 
-let user_id = user.id;
+const fruits = ["💎","🟢","🔷","🔴","🟡"];
 
-const fruits = ["🍎","🍊","🍇","🍒","🍉"];
+const grid = document.getElementById("grid");
 
-function fillReel(id){
-  let el = document.getElementById(id);
-  el.innerHTML = "";
-  for(let i=0;i<10;i++){
-    let d = document.createElement("div");
-    d.innerText = fruits[Math.floor(Math.random()*fruits.length)];
-    el.appendChild(d);
-  }
+// CREATE 9 BOXES
+for(let i=0;i<9;i++){
+  let box = document.createElement("div");
+  box.className = "box";
+  box.id = "b"+i;
+  grid.appendChild(box);
 }
-
-fillReel("r1");
-fillReel("r2");
-fillReel("r3");
 
 // LOAD USER
 async function load(){
   let res = await fetch(`/user/${user_id}`);
   let data = await res.json();
-  document.getElementById("coins").innerText = "Coins: "+data.coins;
+  document.getElementById("coins").innerText = data.coins;
 }
 load();
 
-// SPIN
+// SPIN FUNCTION
 async function spin(){
-
-  // start animation
-  document.getElementById("r1").classList.add("spin");
-  document.getElementById("r2").classList.add("spin");
-  document.getElementById("r3").classList.add("spin");
-
-  // delay different reels (casino feel)
-  setTimeout(()=> document.getElementById("r1").classList.remove("spin"), 1000);
-  setTimeout(()=> document.getElementById("r2").classList.remove("spin"), 1400);
-  setTimeout(()=> document.getElementById("r3").classList.remove("spin"), 1800);
 
   // backend result
   let res = await fetch('/spin',{
@@ -49,11 +34,31 @@ async function spin(){
 
   let data = await res.json();
 
-  setTimeout(()=>{
-    document.getElementById("r1").innerHTML = `<div>${data.result[0]}</div>`;
-    document.getElementById("r2").innerHTML = `<div>${data.result[1]}</div>`;
-    document.getElementById("r3").innerHTML = `<div>${data.result[2]}</div>`;
+  let result = data.result;
 
-    document.getElementById("coins").innerText = "Coins: "+data.coins;
-  },1800);
+  // CLEAR BOXES
+  for(let i=0;i<9;i++){
+    document.getElementById("b"+i).innerHTML="";
+  }
+
+  // FALL ANIMATION
+  for(let i=0;i<9;i++){
+
+    let item = document.createElement("div");
+    item.className = "item";
+    item.innerText = result[i % 3]; // repeat pattern
+
+    let box = document.getElementById("b"+i);
+    box.appendChild(item);
+
+    // delay for each box
+    setTimeout(()=>{
+      item.classList.add("show");
+    }, i * 100); // stagger effect
+  }
+
+  // update coins
+  setTimeout(()=>{
+    document.getElementById("coins").innerText = data.coins;
+  },1000);
 }
