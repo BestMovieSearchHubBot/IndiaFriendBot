@@ -14,7 +14,7 @@ body{
   color:white;
 }
 
-/* TOP BAR */
+/* TOP */
 .topbar{
   display:flex;
   justify-content:space-between;
@@ -28,26 +28,54 @@ body{
   border-radius:20px;
 }
 
-/* GRID */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(3,90px);
-  gap:10px;
-  justify-content:center;
-  margin-top:30px;
+/* 🎰 MACHINE */
+.machine{
+  position:relative;
+  width:320px;
+  margin:auto;
+  margin-top:20px;
 }
 
-/* BOX */
+/* FRAME */
+.frame{
+  position:absolute;
+  width:100%;
+  z-index:3;
+}
+
+/* GRID IMAGE */
+.grid-bg{
+  position:absolute;
+  top:70px;
+  left:25px;
+  width:270px;
+  height:270px;
+  z-index:2;
+}
+
+/* REAL GRID */
+.grid{
+  position:absolute;
+  top:70px;
+  left:25px;
+  width:270px;
+  height:270px;
+
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  grid-template-rows:repeat(3,1fr);
+  gap:10px;
+
+  z-index:1;
+}
+
 .box{
-  width:90px;
-  height:90px;
-  background:linear-gradient(#ffd700,#b8860b);
-  border-radius:10px;
+  background:transparent;
   overflow:hidden;
   position:relative;
 }
 
-/* GEM */
+/* ITEM */
 .item{
   position:absolute;
   top:-100px;
@@ -57,7 +85,7 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
-  transition: top 0.5s ease;
+  transition: top 0.4s ease;
 }
 
 .show{
@@ -78,7 +106,6 @@ body{
   background:purple;
   padding:15px;
   border-radius:10px;
-  text-align:center;
 }
 
 /* CONTROLS */
@@ -96,9 +123,7 @@ body{
   background:orange;
   padding:15px 30px;
   border-radius:50px;
-  font-size:20px;
 }
-
 </style>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -111,7 +136,15 @@ body{
   <div class="coins">💰 <span id="coins">0</span></div>
 </div>
 
-<div class="grid" id="grid"></div>
+<!-- 🎰 MACHINE -->
+<div class="machine">
+
+  <img src="frame.png" class="frame">
+  <img src="grid.png" class="grid-bg">
+
+  <div class="grid" id="grid"></div>
+
+</div>
 
 <div class="sidebar">
   <div class="sidebtn">🎁 Bonus</div>
