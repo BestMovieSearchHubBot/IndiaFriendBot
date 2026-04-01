@@ -1,63 +1,58 @@
-const tg = window.Telegram.WebApp;
-const user = tg.initDataUnsafe.user;
-const user_id = user.id;
+const gems = [
+  "gems/red.png",
+  "gems/blue.png",
+  "gems/green.png",
+  "gems/yellow.png",
+  "gems/purple.png"
+];
 
-const grid = document.getElementById("grid");
+// create reels
+function createReel(id){
+  let reel = document.getElementById(id);
+  reel.innerHTML = "";
 
-// CREATE GRID
-for(let i=0;i<9;i++){
-  let box = document.createElement("div");
-  box.className="box";
-  box.id="b"+i;
-  grid.appendChild(box);
+  for(let i=0;i<15;i++){
+    let img = document.createElement("img");
+    img.src = gems[Math.floor(Math.random()*gems.length)];
+    reel.appendChild(img);
+  }
 }
 
-// LOAD USER
-async function load(){
-  let res = await fetch(`/user/${user_id}`);
-  let data = await res.json();
-  document.getElementById("coins").innerText = data.coins;
+// init
+createReel("r1");
+createReel("r2");
+createReel("r3");
+
+// spin
+function spin(){
+
+  spinReel("r1", 0);
+  spinReel("r2", 200);
+  spinReel("r3", 400);
 }
-load();
 
-// SPIN
-async function spin(){
+// reel animation
+function spinReel(id, delay){
 
-  let res = await fetch('/spin',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ user_id })
-  });
-
-  let data = await res.json();
-
-  // clear
-  for(let i=0;i<9;i++){
-    document.getElementById("b"+i).innerHTML="";
-  }
-
-  // 🎰 animation (column wise better feel)
-  for(let col=0; col<3; col++){
-
-    for(let row=0; row<3; row++){
-
-      let i = row*3 + col;
-
-      let item = document.createElement("div");
-      item.className="item";
-      item.innerText = data.result[col];
-
-      let box = document.getElementById("b"+i);
-      box.appendChild(item);
-
-      setTimeout(()=>{
-        item.classList.add("show");
-      }, col*200 + row*80);
-
-    }
-  }
+  let reel = document.getElementById(id);
 
   setTimeout(()=>{
-    document.getElementById("coins").innerText = data.coins;
-  },1000);
+
+    let position = 0;
+    reel.style.transition = "none";
+
+    let interval = setInterval(()=>{
+      position += 25;
+      reel.style.transform = `translateY(-${position}px)`;
+
+      if(position > 500){
+        clearInterval(interval);
+
+        reel.style.transition = "transform 0.6s ease-out";
+        reel.style.transform = `translateY(-600px)`;
+      }
+
+    },30);
+
+  },delay);
 }
