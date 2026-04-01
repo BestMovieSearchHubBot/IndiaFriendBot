@@ -6,16 +6,34 @@ const gems = [
   "gems/purple.png"
 ];
 
-// create reels
+// create reels with max 3 of each gem
 function createReel(id){
   let reel = document.getElementById(id);
   reel.innerHTML = "";
 
-  for(let i=0;i<15;i++){
-    let img = document.createElement("img");
-    img.src = gems[Math.floor(Math.random()*gems.length)];
-    reel.appendChild(img);
+  // Gem count tracker
+  let gemCount = {};
+  gems.forEach(g => gemCount[g] = 0);
+
+  let reelImages = [];
+
+  while (reelImages.length < 15) {
+    let gem = gems[Math.floor(Math.random() * gems.length)];
+    if (gemCount[gem] < 3) {  // max 3 of each gem
+      reelImages.push(gem);
+      gemCount[gem]++;
+    }
   }
+
+  // Shuffle for randomness
+  reelImages.sort(() => Math.random() - 0.5);
+
+  // Add to reel
+  reelImages.forEach(src => {
+    let img = document.createElement("img");
+    img.src = src;
+    reel.appendChild(img);
+  });
 }
 
 // init
@@ -23,9 +41,8 @@ createReel("r1");
 createReel("r2");
 createReel("r3");
 
-// spin
+// spin reels
 function spin(){
-
   spinReel("r1", 0);
   spinReel("r2", 200);
   spinReel("r3", 400);
@@ -33,26 +50,22 @@ function spin(){
 
 // reel animation
 function spinReel(id, delay){
+  const reel = document.getElementById(id);
+  let top = 0;
+  const speed = 20; // speed of spin
+  const imgHeight = 69; // height + gap approx
 
-  let reel = document.getElementById(id);
+  const interval = setInterval(() => {
+    top -= 10;
+    if (top <= -imgHeight * reel.children.length) top = 0;
+    reel.style.transform = `translateY(${top}px)`;
+  }, speed);
 
-  setTimeout(()=>{
+  setTimeout(() => {
+    clearInterval(interval);
+    reel.style.transform = "translateY(0)";
 
-    let position = 0;
-    reel.style.transition = "none";
-
-    let interval = setInterval(()=>{
-      position += 25;
-      reel.style.transform = `translateY(-${position}px)`;
-
-      if(position > 500){
-        clearInterval(interval);
-
-        reel.style.transition = "transform 0.6s ease-out";
-        reel.style.transform = `translateY(-600px)`;
-      }
-
-    },30);
-
-  },delay);
+    // Reset reel images for next spin
+    createReel(id);
+  }, 2000 + delay); // spin duration
 }
