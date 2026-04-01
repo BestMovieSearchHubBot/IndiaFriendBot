@@ -2,87 +2,109 @@ require('dotenv').config();
 const { Telegraf, session, Markup } = require('telegraf');
 const mongoose = require('mongoose');
 
-// ENV
+// ===== ENV =====
 const BOT_TOKEN = process.env.BOT_TOKEN;
-const MONGO_URI = process.env.MONGO_URI;
+const MONGODB_URI = process.env.MONGODB_URI;
 const WEBHOOK_URL = process.env.WEBHOOK_URL;
 const PORT = process.env.PORT || 3000;
 
-// DB CONNECT
-mongoose.connect(MONGO_URI);
-console.log("MongoDB Connected");
+// ===== DB CONNECT =====
+mongoose.connect(MONGODB_URI)
+.then(()=> console.log("✅ MongoDB Connected"))
+.catch(err => console.log("❌ DB Error:", err));
 
-// USER MODEL
+// ===== USER MODEL =====
 const userSchema = new mongoose.Schema({
-  user_id: Number,
+  user_id: { type: Number, unique: true },
   name: String,
   coins: { type: Number, default: 100 },
   spins: { type: Number, default: 5 },
-  last_daily: { type: Date, default: null },
   referrals: { type: Number, default: 0 },
-  referred_by: { type: Number, default: null }
+  referred_by: { type: Number, default: null },
+  last_daily: { type: Date, default: null }
 });
+
 const User = mongoose.model('User', userSchema);
 
-// BOT
+// ===== BOT =====
 const bot = new Telegraf(BOT_TOKEN);
 bot.use(session());
 
-// SLOT ITEMS
+// ===== SLOT ITEMS =====
 const items = ["🍎","🍊","🍇","🍒","🍉","🥝","🍍"];
 
 // RANDOM RESULT
-function spinResult() {
-  return [
-    items[Math.floor(Math.random()*items.length)],
-    items[Math.floor(Math.random()*items.length)],
-    items[Math.floor(Math.random()*items.length)]
-  ];
+function spinRoll() {
+  return items[Math.floor(Math.random()*items.length)];
 }
 
-// WIN CALC
-function calcWin(r) {
-  if (r[0] === r[1] && r[1] === r[2]) return 50;
-  if (r[0] === r[1] || r[1] === r[2]) return 10;
+// RESULT CALC
+function calculateWin(a,b,c){
+  if(a===b && b===c) return 50;
+  if(a===b || b===c || a===c) return 10;
   return 0;
 }
 
 // GET USER
-async function getUser(id, name) {
-  let user = await User.findOne({ user_id: id });
-  if (!user) {
-    user = await User.create({ user_id: id, name });
+async function getUser(id, name="User"){
+  let user = await User.findOne({ user_id:id });
+  if(!user){
+    user = await User.create({
+      user_id:id,
+      name
+    });
   }
   return user;
 }
 
-// START
-bot.start(async (ctx) => {
+// ===== MENU =====
+function menu(){
+  return Markup.keyboard([
+    ['🎰 Spin','🎁 Daily'],
+    ['👥 Referral','💰 Balance'],
+    ['🏆 Leaderboard','💸 Withdraw']
+  ]).resize();
+}
+
+// ===== START =====
+bot.start(async (ctx)=>{
   const id = ctx.from.id;
   const name = ctx.from.first_name;
 
+  const args = ctx.message.text.split(" ");
+  let ref = null;
+
+  if(args[1]) ref = parseInt(args[1]);
+
   let user = await getUser(id, name);
 
-  await ctx.reply(
+  // referral
+  if(ref && ref !== id && !user.referred_by){
+    user.referred_by = ref;
+    await user.save();
+
+    let refUser = await User.findOne({ user_id: ref });
+    if(refUser){
+      refUser.spins += 2;
+      refUser.referrals += 1;
+      await refUser.save();
+    }
+  }
+
+  ctx.reply(
 `🎰 Welcome ${name}
 
 💰 Coins: ${user.coins}
-🎟 Spins: ${user.spins}
-
-👇 Choose option`,
-Markup.keyboard([
-['🎰 Spin','🎁 Daily'],
-['👥 Referral','💰 Balance'],
-['🏆 Leaderboard','💸 Withdraw']
-]).resize()
-);
+🎟 Spins: ${user.spins}`,
+menu()
+  );
 });
 
-// SPIN
-bot.hears('🎰 Spin', async (ctx) => {
+// ===== SPIN =====
+bot.hears('🎰 Spin', async (ctx)=>{
   const user = await getUser(ctx.from.id);
 
-  if (user.spins <= 0) {
+  if(user.spins <= 0){
     return ctx.reply("❌ No spins left");
   }
 
@@ -91,21 +113,25 @@ bot.hears('🎰 Spin', async (ctx) => {
 
   let msg = await ctx.reply("🎰 Spinning...\n🍒 | 🍋 | 🍊");
 
-  // FAKE ANIMATION
-  for (let i=0; i<5; i++) {
-    let r = spinResult();
-    await new Promise(r => setTimeout(r, 500));
+  let a,b,c;
+
+  // animation (fast → slow)
+  for(let i=0;i<8;i++){
+    a = spinRoll();
+    b = spinRoll();
+    c = spinRoll();
+
+    await new Promise(r=>setTimeout(r, 200 + i*80));
+
     await ctx.telegram.editMessageText(
       ctx.chat.id,
       msg.message_id,
       null,
-      `🎰 Spinning...\n${r.join(" | ")}`
+      `🎰 Spinning...\n${a} | ${b} | ${c}`
     );
   }
 
-  const result = spinResult();
-  const win = calcWin(result);
-
+  const win = calculateWin(a,b,c);
   user.coins += win;
   await user.save();
 
@@ -113,20 +139,21 @@ bot.hears('🎰 Spin', async (ctx) => {
     ctx.chat.id,
     msg.message_id,
     null,
-`🎉 Result: ${result.join(" | ")}
+`🎉 Result: ${a} | ${b} | ${c}
 
-💰 Won: ${win} coins
-💵 Total: ${user.coins}
-🎟 Spins left: ${user.spins}`
+💰 Won: ${win}
+💵 Total Coins: ${user.coins}
+🎟 Spins Left: ${user.spins}`
   );
 });
 
-// DAILY BONUS
-bot.hears('🎁 Daily', async (ctx) => {
+// ===== DAILY =====
+bot.hears('🎁 Daily', async (ctx)=>{
   const user = await getUser(ctx.from.id);
 
   const now = Date.now();
-  if (user.last_daily && now - user.last_daily < 86400000) {
+
+  if(user.last_daily && now - user.last_daily < 86400000){
     return ctx.reply("⏳ Already claimed today");
   }
 
@@ -136,26 +163,31 @@ bot.hears('🎁 Daily', async (ctx) => {
 
   await user.save();
 
-  ctx.reply("🎁 Daily bonus claimed!\n+20 coins\n+2 spins");
+  ctx.reply("🎁 Daily Bonus:\n+20 Coins\n+2 Spins");
 });
 
-// BALANCE
-bot.hears('💰 Balance', async (ctx) => {
+// ===== BALANCE =====
+bot.hears('💰 Balance', async (ctx)=>{
   const u = await getUser(ctx.from.id);
   ctx.reply(`💰 Coins: ${u.coins}\n🎟 Spins: ${u.spins}`);
 });
 
-// REFERRAL
-bot.hears('👥 Referral', async (ctx) => {
-  const botInfo = await bot.telegram.getMe();
-  const link = `https://t.me/${botInfo.username}?start=${ctx.from.id}`;
+// ===== REFERRAL =====
+bot.hears('👥 Referral', async (ctx)=>{
+  const me = await bot.telegram.getMe();
+  const link = `https://t.me/${me.username}?start=${ctx.from.id}`;
 
-  ctx.reply(`👥 Invite friends:\n${link}\n\n🎁 Get 2 spins per join`);
+  ctx.reply(
+`👥 Invite friends:
+${link}
+
+🎁 Get +2 spins per join`
+  );
 });
 
-// LEADERBOARD
-bot.hears('🏆 Leaderboard', async (ctx) => {
-  const top = await User.find().sort({ coins: -1 }).limit(5);
+// ===== LEADERBOARD =====
+bot.hears('🏆 Leaderboard', async (ctx)=>{
+  const top = await User.find().sort({ coins:-1 }).limit(5);
 
   let text = "🏆 Top Players\n\n";
   top.forEach((u,i)=>{
@@ -165,22 +197,22 @@ bot.hears('🏆 Leaderboard', async (ctx) => {
   ctx.reply(text);
 });
 
-// WITHDRAW
-bot.hears('💸 Withdraw', async (ctx) => {
+// ===== WITHDRAW =====
+bot.hears('💸 Withdraw', async (ctx)=>{
   const user = await getUser(ctx.from.id);
 
-  if (user.coins < 500) {
+  if(user.coins < 500){
     return ctx.reply("❌ Minimum 500 coins required");
   }
 
   user.coins -= 500;
   await user.save();
 
-  ctx.reply("✅ Withdraw request sent (demo)");
+  ctx.reply("✅ Withdraw request submitted (demo)");
 });
 
-// WEBHOOK
+// ===== WEBHOOK =====
 bot.telegram.setWebhook(`${WEBHOOK_URL}/webhook`);
 bot.startWebhook('/webhook', null, PORT);
 
-console.log("Bot Running...");
+console.log("🚀 Bot Running...");
