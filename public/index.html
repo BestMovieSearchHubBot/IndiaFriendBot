@@ -9,9 +9,8 @@
 <style>
 body{
   margin:0;
-  font-family: 'Orbitron', sans-serif;
-  background:url('bg.jpg') no-repeat center 80%/cover;
-  color:white;
+  font-family:'Orbitron',sans-serif;
+  background:url('bg.jpg') no-repeat center -80%/cover;
 }
 
 /* TOP */
@@ -28,7 +27,7 @@ body{
   border-radius:20px;
 }
 
-/* 🎰 MACHINE */
+/* MACHINE */
 .machine{
   position:relative;
   width:320px;
@@ -43,53 +42,32 @@ body{
   z-index:3;
 }
 
-/* GRID IMAGE */
-.grid-bg{
+/* 🎰 REELS */
+.reels{
   position:absolute;
   top:70px;
   left:25px;
   width:270px;
   height:270px;
+
+  display:flex;
+  justify-content:space-between;
+  overflow:hidden;
   z-index:2;
 }
 
-/* REAL GRID */
-.grid{
-  position:absolute;
-  top:70px;
-  left:25px;
-  width:270px;
-  height:270px;
-
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  grid-template-rows:repeat(3,1fr);
-  gap:10px;
-
-  z-index:1;
-}
-
-.box{
-  background:transparent;
+.reel{
+  width:80px;
+  height:100%;
   overflow:hidden;
   position:relative;
 }
 
-/* ITEM */
-.item{
-  position:absolute;
-  top:-100px;
+.reel img{
   width:100%;
-  height:100%;
-  font-size:40px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  transition: top 0.4s ease;
-}
-
-.show{
-  top:0;
+  height:90px;
+  object-fit:contain;
+  display:block;
 }
 
 /* SIDEBAR */
@@ -123,26 +101,28 @@ body{
   background:orange;
   padding:15px 30px;
   border-radius:50px;
+  font-size:18px;
 }
 </style>
 
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 
 <body>
 
 <div class="topbar">
   <div>👤 Player</div>
-  <div class="coins">💰 <span id="coins">0</span></div>
+  <div class="coins">💰 <span id="coins">1000</span></div>
 </div>
 
-<!-- 🎰 MACHINE -->
 <div class="machine">
 
   <img src="frame.png" class="frame">
-  <img src="grid.png" class="grid-bg">
 
-  <div class="grid" id="grid"></div>
+  <div class="reels">
+    <div class="reel" id="r1"></div>
+    <div class="reel" id="r2"></div>
+    <div class="reel" id="r3"></div>
+  </div>
 
 </div>
 
