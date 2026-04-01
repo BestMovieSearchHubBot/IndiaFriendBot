@@ -1,4 +1,4 @@
-// India Scratch & Win Bot – Viral & Free-Tier Friendly (HTML version)
+// India Scratch & Win Bot – Withdrawal + Referral Button
 require('dotenv').config();
 const { Telegraf, session, Markup } = require('telegraf');
 const mongoose = require('mongoose');
@@ -8,6 +8,7 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 const MONGODB_URI = process.env.MONGODB_URI;
 const WEBHOOK_URL = process.env.WEBHOOK_URL;
 const PORT = process.env.PORT || 8443;
+const ADMIN_CHANNEL_ID = process.env.ADMIN_CHANNEL_ID; // e.g., -1001234567890
 
 // Connect to MongoDB
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -23,7 +24,7 @@ const userSchema = new mongoose.Schema({
   user_id: { type: Number, unique: true, required: true },
   name: { type: String, default: '' },
   cards: { type: Number, default: 1 },
-  points: { type: Number, default: 0 },
+  points: { type: Number, default: 0 }, // in cents
   referrals_count: { type: Number, default: 0 },
   referred_by: { type: Number, default: null },
   created_at: { type: Date, default: Date.now }
@@ -35,14 +36,24 @@ userSchema.index({ points: -1 });
 const transactionSchema = new mongoose.Schema({
   user_id: Number,
   amount: Number,
-  type: String,
+  type: String, // 'purchase', 'referral_bonus', 'scratch_win', 'withdraw'
   details: String,
   timestamp: { type: Date, default: Date.now }
 });
 transactionSchema.index({ timestamp: -1 });
 
+const withdrawalSchema = new mongoose.Schema({
+  user_id: Number,
+  name: String,
+  amount: Number, // in dollars (float)
+  upi_id: String,
+  status: { type: String, default: 'pending' }, // pending, completed
+  created_at: { type: Date, default: Date.now }
+});
+
 const User = mongoose.model('User', userSchema);
 const Transaction = mongoose.model('Transaction', transactionSchema);
+const Withdrawal = mongoose.model('Withdrawal', withdrawalSchema);
 
 // Prize list (fruit, value in dollars)
 const prizes = [
@@ -99,6 +110,7 @@ async function getUser(userId) {
 async function setupIndexes() {
   await User.syncIndexes();
   await Transaction.syncIndexes();
+  await Withdrawal.syncIndexes();
   console.log('Indexes synced');
 }
 
@@ -125,7 +137,6 @@ bot.start(async (ctx) => {
   if (user) {
     await ctx.reply(`🎉 Welcome back, <b>${escapeHtml(user.name || ctx.from.first_name)}</b>!\nYou have ${user.cards} scratch cards.\nBalance: $${(user.points/100).toFixed(2)}`, { parse_mode: 'HTML' });
   } else {
-    // Create new user with 1 free card
     user = new User({
       user_id: userId,
       name: ctx.from.first_name,
@@ -135,7 +146,6 @@ bot.start(async (ctx) => {
     });
     await user.save();
 
-    // Reward referrer with 1 card
     if (user.referred_by) {
       await addCards(user.referred_by, 1, 'referral_bonus', userId);
       await User.updateOne({ user_id: user.referred_by }, { $inc: { referrals_count: 1 } });
@@ -182,7 +192,6 @@ bot.action(/scratch_\d+/, async (ctx) => {
     return;
   }
 
-  // Deduct one card
   await User.updateOne({ user_id: userId }, { $inc: { cards: -1 } });
   const prize = getRandomPrize();
   const pointsEarned = Math.round(prize.value * 100);
@@ -207,20 +216,83 @@ bot.action('play_again', async (ctx) => {
   await ctx.telegram.sendMessage(ctx.chat.id, '/scratch');
 });
 
-// --------------------- Referral System (Fixed HTML) ---------------------
+// --------------------- Referral (Inline Button) ---------------------
 bot.command('referral', async (ctx) => {
   const userId = ctx.from.id;
   const user = await getUser(userId);
   if (!user) return ctx.reply('Please /start first.');
 
   const link = `https://t.me/${botUsername}?start=ref_${userId}`;
-  const topRefs = await User.find({}).sort({ referrals_count: -1 }).limit(5).lean();
-  let leaderboard = '<b>🏆 Top Referrers</b>\n';
-  for (let i = 0; i < topRefs.length; i++) {
-    leaderboard += `${i+1}. ${escapeHtml(topRefs[i].name)} – ${topRefs[i].referrals_count} invites\n`;
+  const shareText = `🎁 Earn free scratch cards! Join India Scratch & Win using my link: ${link}`;
+
+  const shareButton = Markup.inlineKeyboard([
+    [Markup.button.url('📤 Share Referral Link', `https://t.me/share/url?url=${encodeURIComponent(shareText)}`)]
+  ]);
+  await ctx.reply(`<b>🔗 Your Referral Link</b>\n${link}\n\nClick the button below to share it with friends!\n\n<i>Each friend who joins gives you +1 scratch card!</i>`, { parse_mode: 'HTML', ...shareButton });
+});
+
+// --------------------- Withdrawal ---------------------
+bot.command('withdraw', async (ctx) => {
+  const userId = ctx.from.id;
+  const user = await getUser(userId);
+  if (!user) return ctx.reply('Please /start first.');
+
+  const balance = user.points / 100;
+  if (balance < 10) {
+    return ctx.reply(`Minimum withdrawal is $10. Your current balance is $${balance.toFixed(2)}. Keep scratching!`);
   }
-  const text = `<b>🔗 Your Referral Link</b>\n${link}\n\n<b>📊 Stats</b>\nInvites: ${user.referrals_count}\n\n${leaderboard}\n\n<b>How it works:</b>\n- Each friend who joins gives you <b>+1 scratch card</b>.\n- Top referrers get featured here!`;
-  await ctx.reply(text, { parse_mode: 'HTML' });
+
+  // Ask for UPI ID
+  ctx.session.withdrawState = 'awaiting_upi';
+  await ctx.reply('Please enter your UPI ID (e.g., name@okhdfcbank):');
+});
+
+// Handle withdrawal UPI input
+bot.on('text', async (ctx) => {
+  if (ctx.session.withdrawState === 'awaiting_upi') {
+    const userId = ctx.from.id;
+    const user = await getUser(userId);
+    if (!user) {
+      ctx.session.withdrawState = null;
+      return ctx.reply('Please /start first.');
+    }
+
+    const upi = ctx.message.text.trim();
+    if (!upi.includes('@')) {
+      await ctx.reply('Invalid UPI ID. Please enter a valid UPI ID (e.g., name@okhdfcbank).');
+      return;
+    }
+
+    const amount = user.points / 100;
+    if (amount < 10) {
+      ctx.session.withdrawState = null;
+      return ctx.reply(`Minimum withdrawal is $10. Your current balance is $${amount.toFixed(2)}.`);
+    }
+
+    // Deduct points
+    await User.updateOne({ user_id: userId }, { $set: { points: 0 } });
+    await new Transaction({ user_id: userId, amount: -amount, type: 'withdraw', details: `Withdrawal $${amount.toFixed(2)} to UPI ${upi}` }).save();
+
+    // Save withdrawal request
+    const withdrawal = new Withdrawal({
+      user_id: userId,
+      name: user.name,
+      amount,
+      upi_id: upi
+    });
+    await withdrawal.save();
+
+    // Send to admin channel
+    if (ADMIN_CHANNEL_ID) {
+      const msg = `<b>💰 Withdrawal Request</b>\n\n<b>User:</b> ${escapeHtml(user.name)} (ID: ${userId})\n<b>Amount:</b> $${amount.toFixed(2)}\n<b>UPI ID:</b> ${upi}\n<b>Time:</b> ${new Date().toLocaleString()}`;
+      await ctx.telegram.sendMessage(ADMIN_CHANNEL_ID, msg, { parse_mode: 'HTML' });
+    } else {
+      console.log('ADMIN_CHANNEL_ID not set. Withdrawal request:', { user: user.name, amount, upi });
+    }
+
+    await ctx.reply(`✅ Withdrawal request of $${amount.toFixed(2)} submitted. Our team will process it soon. Your balance is now $0.`);
+    ctx.session.withdrawState = null;
+  }
 });
 
 // --------------------- Buy Cards with Stars ---------------------
@@ -257,7 +329,7 @@ bot.on('successful_payment', async (ctx) => {
   }
 });
 
-// --------------------- Balance & Leaderboard (HTML) ---------------------
+// --------------------- Balance & Leaderboard ---------------------
 bot.command('balance', async (ctx) => {
   const userId = ctx.from.id;
   const user = await getUser(userId);
@@ -282,7 +354,7 @@ bot.command('leaderboard', async (ctx) => {
 
 // --------------------- Help ---------------------
 bot.command('help', async (ctx) => {
-  const text = `<b>🎮 Commands</b>\n/start – Register & get your first card\n/scratch – Scratch a card\n/buy – Buy more cards with Stars\n/referral – Invite friends & earn cards\n/balance – Your stats\n/leaderboard – Top players\n\n<b>How to win:</b> Each card gives a random fruit worth $0.25 to $2. Collect points and compete on the leaderboard!`;
+  const text = `<b>🎮 Commands</b>\n/start – Register & get your first card\n/scratch – Scratch a card\n/buy – Buy more cards with Stars\n/referral – Invite friends & earn cards\n/withdraw – Request withdrawal (min $10)\n/balance – Your stats\n/leaderboard – Top players\n\n<b>How to win:</b> Each card gives a random fruit worth $0.25 to $2. Collect points and compete on the leaderboard!`;
   await ctx.reply(text, { parse_mode: 'HTML' });
 });
 
