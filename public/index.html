@@ -5,16 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Lucky Gems Slot</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Roboto:wght@400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
 
 <style>
-/* 🔴 ZOOM & SELECTION KILLER - Isse zoom aur long press band ho jayega */
 * { 
   box-sizing: border-box; 
+  /* Long press/Selection disable karne ke liye */
   -webkit-touch-callout: none; 
   -webkit-user-select: none; 
-  user-select: none;
-  touch-action: none; 
+  user-select: none; 
+  /* Tap highlight hatane ke liye */
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -26,8 +26,8 @@ body {
   background-size: cover;
   height: 100vh;
   overflow: hidden;
-  position: fixed;
-  width: 100%;
+  /* Screen bounce/scroll disable karne ke liye */
+  touch-action: none; 
 }
 
 /* TOP BAR */
@@ -36,11 +36,9 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 10px 15px;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(5px);
   color: white;
-  z-index: 10;
-  position: relative;
 }
 
 .coins {
@@ -48,7 +46,6 @@ body {
   padding: 5px 15px;
   border-radius: 20px;
   border: 1px solid #ffd700;
-  color: #ffd700;
 }
 
 /* MACHINE CONTAINER */
@@ -56,7 +53,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 180px; /* Frame ko screen ke beech mein laane ke liye */
+  margin-top: 220px; /* Thoda adjust kiya hai balance ke liye */
   position: relative;
 }
 
@@ -75,20 +72,20 @@ body {
   height: 100%;
   z-index: 3;
   pointer-events: none; 
-  transform: scale(1.25); 
+  transform: scale(1.25); /* Halka sa aur bada kiya hai fitting ke liye */
   transform-origin: center;
 }
 
-/* 🎰 REELS AREA - Gaps and Alignment Fixed */
+/* 🎰 REELS AREA - GAPS FIX KIYE GAYE HAIN */
 .reels {
   position: absolute;
-  top: 36px;    
-  left: -5px;    
-  width: 360px; 
-  height: 295px; 
+  top: 18px;    /* Frame ke boxes ke center mein laane ke liye */
+  left: -8px;   /* Side gaps fix karne ke liye shift kiya */
+  width: 365px; /* Width badhayi taaki gems side boxes mein jayein */
+  height: 310px; 
   display: flex;
-  justify-content: center;
-  gap: 12px;    
+  justify-content: center; /* Center alignment */
+  gap: 12px;    /* Columns ke beech ka gap */
   overflow: hidden; 
   z-index: 2;
 }
@@ -96,17 +93,15 @@ body {
 .reel {
   display: flex;
   flex-direction: column;
-  width: 95px;  
+  width: 85px;  /* Har gem box ki fixed width */
   align-items: center;
-  transition: transform 0.5s cubic-bezier(0.45, 0.05, 0.55, 0.95);
 }
 
 .reel img {
-  width: 95px;  
-  height: 88px; 
+  width: 85px;  /* Gems ka size bada kiya */
+  height: 85px; 
   object-fit: contain;
-  margin-bottom: 12px; 
-  display: block;
+  margin-bottom: 18px; /* Do gems ke beech ka vertical gap */
 }
 
 /* SIDEBAR */
@@ -123,12 +118,13 @@ body {
 
 .sidebtn {
   background: linear-gradient(180deg, #9c27b0, #4a148c);
-  padding: 10px 5px;
+  padding: 12px 8px;
   border-radius: 8px;
   color: white;
   text-align: center;
-  font-size: 10px;
-  border: 1px solid rgba(255,255,255,0.3);
+  font-size: 12px;
+  border: 1px solid #ffffff50;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
 
 /* CONTROLS */
@@ -138,34 +134,39 @@ body {
   width: 100%;
   background: rgba(0, 0, 0, 0.85);
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
-  padding: 15px;
-  border-top: 2px solid #333;
-  z-index: 10;
+  padding: 15px 25px;
+  color: white;
+  border-top: 2px solid #444;
 }
 
-.spin-btn {
+.bet-control {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-size: 18px;
+}
+
+.spin {
   background: linear-gradient(180deg, #ffb300, #fb8c00);
-  padding: 12px 50px;
+  padding: 12px 40px;
   border-radius: 30px;
   font-size: 20px;
   font-weight: bold;
   color: #000;
   cursor: pointer;
   box-shadow: 0 4px 0 #b35900;
+  transition: 0.1s;
 }
 
-.spin-btn:active {
+.spin:active {
   transform: scale(0.95);
-  box-shadow: 0 2px 0 #b35900;
 }
 </style>
 </head>
-<body oncontextmenu="return false;">
-
-<div class="topbar">
-  <div>👤 PLAYER</div>
+<body oncontextmenu="return false;"> <div class="topbar">
+  <div>👤 Player</div>
   <div class="coins">💰 <span id="coins">1030</span></div>
 </div>
 
@@ -180,53 +181,21 @@ body {
   </div>
 
   <div class="sidebar">
-    <div class="sidebtn">🎁 BONUS</div>
+    <div class="sidebtn">🎁 Bonus</div>
     <div class="sidebtn">500x</div>
     <div class="sidebtn">100x</div>
   </div>
 </div>
 
 <div class="controls">
-  <div style="color:white">BET 1</div>
-  <div class="spin-btn" onclick="spin()">SPIN</div>
+  <div class="bet-control">
+    <span>-</span>
+    <span>BET 1</span>
+    <span>+</span>
+  </div>
+  <div class="spin" onclick="spin()">SPIN</div>
 </div>
 
-<script>
-// Gems ki list - Inhe apne folder ke naam se match karein
-const symbols = [
-  'gems/blue.png',
-  'gems/red.png',
-  'gems/green.png',
-  'gems/yellow.png',
-  'gems/purple.png'
-];
-
-// Page load hote hi gems dikhane ke liye function
-function initGame() {
-  for (let i = 1; i <= 3; i++) {
-    const reel = document.getElementById('r' + i);
-    reel.innerHTML = ''; // Purana clear karein
-    for (let j = 0; j < 10; j++) { // 10 gems generate karein taaki spin animation dikhe
-      const img = document.createElement('img');
-      img.src = symbols[Math.floor(Math.random() * symbols.length)];
-      reel.appendChild(img);
-    }
-  }
-}
-
-function spin() {
-  // Spin sound ya logic yahan add karein
-  initGame(); // Filhal bas naye gems load honge
-}
-
-// Zoom aur long press ko rokne ke liye extra security
-document.addEventListener('touchstart', function (e) {
-  if (e.touches.length > 1) e.preventDefault();
-}, { passive: false });
-
-// Game start karein
-initGame();
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
