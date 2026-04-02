@@ -69,13 +69,16 @@ body {
 }
 
 
-/* 🎰 REELS AREA */
 .reels {
   position: absolute;
-  top: 45px;    /* Frame ke holes ke hisab se adjust karein */
-  left: 22px;   /* Frame ke holes ke hisab se adjust karein */
-  width: 276px; /* Total width of 3 columns */
-  height: 225px; /* Height of 3 rows */
+  /* Frame bada hone par in values ko thoda adjust karna pad sakta hai */
+  top: 50px;    
+  left: 20px;   
+  
+  /* Width aur Height badhayi hai taaki bade gems fit ho sakein */
+  width: 300px; 
+  height: 270px; 
+  
   display: flex;
   justify-content: space-around;
   overflow: hidden; 
@@ -85,15 +88,19 @@ body {
 .reel {
   display: flex;
   flex-direction: column;
-  width: 30%;
+  /* Width ko 33% tak le ja sakte hain taaki gems side-to-side bade dikhen */
+  width: 33%; 
 }
 
 .reel img {
   width: 100%;
-  height: 75px; /* height = reels height / 3 */
+  /* Height ko 75px se badha kar 88px kiya hai (taaki 3 gems 270px mein fit hon) */
+  height: 88px; 
   object-fit: contain;
-  margin-bottom: 2px;
+  /* Vertical gap ko thoda badhaya hai */
+  margin-bottom: 5px; 
 }
+
 
 /* SIDEBAR - In-game features */
 .sidebar {
