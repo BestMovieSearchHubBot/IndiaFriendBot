@@ -51,31 +51,29 @@ body{
   position:absolute;
   top:70px;
   left:25px;
-  width:270px;
-  height:210px; /* 3 gems visible */
+  width:270px;  /* total reel container width */
+  height:210px;
   display:flex;
-  justify-content:space-between; /* evenly spread reels */
-  overflow:hidden; 
+  justify-content:center;  /* reels container ke center me */
+  overflow:hidden;
   z-index:2;
 }
 
 .reel{
-  margin:0 2px; /* adjust horizontal spacing exactly */
-}
-
-.reel{
+  width:80px;       /* har reel ki fixed width */
+  margin:0 5px;     /* reels ke beech horizontal spacing */
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:1px;   
+  gap:1px;          /* vertical spacing gems ke liye */
 }
 
 .reel img{
-  width:78%;       /* ya apne design ke hisab se */
+  width:78%;       /* image ka width */
   height:68px;
   object-fit:contain;
   display:block;
-  margin:0 auto;   /* horizontal center */
+  margin:0 auto;   /* horizontal center inside reel */
 }
 
 /* SIDEBAR */
