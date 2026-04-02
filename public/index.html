@@ -1,21 +1,22 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Lucky Gems Slot</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
 
 <style>
-/* 🔴 GLOBAL FIXES: Scroll & Selection disable karne ke liye */
+/* 🔴 ZOOM & SELECTION KILLER */
 * { 
   box-sizing: border-box; 
-  -webkit-touch-callout: none; /* iOS context menu prevent */
-  -webkit-user-select: none;   /* Disable selection */
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
+  -webkit-touch-callout: none; 
+  -webkit-user-select: none; 
   user-select: none;
+  /* Zoom ko browser level par block karne ke liye */
+  touch-action: none; 
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -25,25 +26,9 @@ body {
   background: url('bg.jpg') no-repeat center center fixed;
   background-size: cover;
   height: 100vh;
-  overflow: hidden; /* Scroll disable */
-}
-
-/* TOP BAR */
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 15px;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(5px);
-  color: white;
-}
-
-.coins {
-  background: #111;
-  padding: 5px 15px;
-  border-radius: 20px;
-  border: 1px solid #ffd700;
+  overflow: hidden;
+  position: fixed; /* Screen hilne se rokne ke liye */
+  width: 100%;
 }
 
 /* MACHINE CONTAINER */
@@ -51,62 +36,60 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 260px; /* Adjust according to your screen */
+  margin-top: 250px; 
   position: relative;
 }
 
 .machine {
   position: relative;
-  width: 350px; /* Base width */
-  height: 350px; /* Base height */
+  width: 350px; 
+  height: 350px; 
 }
 
 /* FRAME */
 .frame {
   position: absolute;
-  top: 15px;
-  left: 2px;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   z-index: 3;
-  pointer-events: none; /* Click reels ke piche na ruke */
-  transform: scale(1.2); 
+  pointer-events: none; 
+  transform: scale(1.28); /* Thoda bada kiya taaki gaps cover hon */
   transform-origin: center;
 }
 
-/* 🎰 REELS AREA - Precision fitting changes */
+/* 🎰 REELS AREA - GAPS & ALIGNMENT FIXED */
 .reels {
   position: absolute;
-  top: 55px;    /* Frame ke upar-neeche box position */
-  left: 20px;   /* Frame ke left box position */
-  width: 310px; /* Total width increased */
-  height: 270px; /* Total height increased */
+  top: 38px;    /* Gems ko boxes mein center laane ke liye thoda niche kiya */
+  left: 0px;    /* Side gaps fix karne ke liye zero kiya */
+  width: 350px; /* Frame ki base width ke barabar */
+  height: 290px; 
   display: flex;
+  justify-content: center; /* Columns ko beech mein rakhega */
+  gap: 15px;    /* Har line ke beech ka gap */
   overflow: hidden; 
   z-index: 2;
-  /* 🔴 EXTRA LOCK: Long press disable on container level */
-  -webkit-touch-callout: none;
 }
 
 .reel {
   display: flex;
   flex-direction: column;
-  width: 33.33%; /* Teen equal columns */
-  align-items: center; /* Gems center aligned horizontally */
-  gap: 12px;   /* Vertical gap between gems increased */
+  width: 92px;  /* Har gem column ki width */
+  align-items: center;
 }
 
 .reel img {
-  width: 100px; /* Fixed larger size per gem */
-  height: 85px; /* Proportional height to fill the box */
-  object-fit: contain; /* Don't squash the gem */
+  width: 92px;  
+  height: 85px; 
+  object-fit: contain;
+  margin-bottom: 12px; /* Do gems ke beech ka vertical gap */
   display: block;
-  /* 🔴 EXTRA LOCK: Specific lock for images to prevent browser menu */
-  -webkit-touch-callout: none;
-  pointer-events: none; /* Click reels ke piche jaise spin handle ho */
+  pointer-events: none;
 }
 
-/* SIDEBAR - In-game features */
+/* SIDEBAR & CONTROLS (Same as before) */
 .sidebar {
   position: absolute;
   right: 5px;
@@ -120,62 +103,33 @@ body {
 
 .sidebtn {
   background: linear-gradient(180deg, #9c27b0, #4a148c);
-  padding: 12px 8px;
+  padding: 10px 8px;
   border-radius: 8px;
   color: white;
   text-align: center;
-  font-size: 12px;
-  border: 1px solid #ffffff50;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  font-size: 11px;
 }
 
-/* CONTROLS */
 .controls {
   position: fixed;
   bottom: 0;
   width: 100%;
   background: rgba(0, 0, 0, 0.85);
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 25px;
-  color: white;
-  border-top: 2px solid #444;
-}
-
-.bet-control {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  font-size: 18px;
+  justify-content: space-around;
+  padding: 15px;
+  z-index: 10;
 }
 
 .spin {
-  background: linear-gradient(180deg, #ffb300, #fb8c00);
+  background: orange;
   padding: 12px 40px;
   border-radius: 30px;
-  font-size: 20px;
   font-weight: bold;
-  color: #000;
-  cursor: pointer;
-  box-shadow: 0 4px 0 #b35900;
-  transition: 0.1s;
-}
-
-.spin:active {
-  transform: translateY(2px);
-  box-shadow: 0 2px 0 #b35900;
 }
 </style>
-
 </head>
-
-<body>
-
-<div class="topbar">
-  <div>👤 Player</div>
-  <div class="coins">💰 <span id="coins">1120</span></div>
-</div>
+<body oncontextmenu="return false;">
 
 <div class="machine-container">
   <div class="machine">
@@ -186,23 +140,23 @@ body {
       <div class="reel" id="r3"></div>
     </div>
   </div>
-
-  <div class="sidebar">
-    <div class="sidebtn">🎁 Bonus</div>
-    <div class="sidebtn">500x</div>
-    <div class="sidebtn">100x</div>
-  </div>
 </div>
 
 <div class="controls">
-  <div class="bet-control">
-    <span>-</span>
-    <span>BET 1</span>
-    <span>+</span>
-  </div>
   <div class="spin" onclick="spin()">SPIN</div>
 </div>
 
-<script src="script.js"></script>
+<script>
+// Zoom rokne ke liye ek extra safety script
+document.addEventListener('touchstart', function (event) {
+  if (event.touches.length > 1) {
+    event.preventDefault();
+  }
+}, { passive: false });
+
+document.addEventListener('gesturestart', function (event) {
+  event.preventDefault();
+});
+</script>
 </body>
 </html>
