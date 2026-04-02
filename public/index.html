@@ -208,6 +208,11 @@ img, .sidebtn, .spin, .reel {
 <script>
 const spinBtn = document.getElementById('spinBtn');
 
+// Normal click pe spin function call kare
+spinBtn.addEventListener('click', () => {
+    if (typeof spin === "function") spin(); // aapke script.js me spin function call hoga
+});
+
 // Long press / contextmenu safe without blocking normal click
 spinBtn.addEventListener('touchstart', e => e.stopPropagation(), {passive:true});
 spinBtn.addEventListener('mousedown', e => e.stopPropagation());
