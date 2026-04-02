@@ -6,105 +6,86 @@ const gems = [
   "gems/purple.png"
 ];
 
-let coinsEl = document.getElementById("coins");
 let coins = 1000;
+document.getElementById("coins").innerText = coins;
 
-// create reel with 15 images, max 3 of each gem
+// create 15 images per reel with max 3 repetitions per gem
 function createReel(id){
-  let reel = document.getElementById(id);
+  const reel = document.getElementById(id);
   reel.innerHTML = "";
+  const counts = {}; // track max 3 per gem
+  for(let g of gems) counts[g]=0;
 
-  let gemCount = {};
-  gems.forEach(g => gemCount[g] = 0);
-
-  let reelImages = [];
-
-  while(reelImages.length < 15){
-    let gem = gems[Math.floor(Math.random() * gems.length)];
-    if(gemCount[gem] < 3){
-      reelImages.push(gem);
-      gemCount[gem]++;
+  let images = [];
+  while(images.length < 15){
+    const gem = gems[Math.floor(Math.random()*gems.length)];
+    if(counts[gem]<3){
+      images.push(gem);
+      counts[gem]++;
     }
   }
 
-  // shuffle
-  reelImages.sort(() => Math.random() - 0.5);
-
-  // add to reel
-  reelImages.forEach(src => {
-    let img = document.createElement("img");
+  // add images to reel
+  images.forEach(src=>{
+    const img = document.createElement("img");
     img.src = src;
     reel.appendChild(img);
   });
 }
 
-// init
+// init reels
 createReel("r1");
 createReel("r2");
 createReel("r3");
 
-// spin reels
+// spin animation
 function spin(){
-  spinReel("r1", 0);
-  spinReel("r2", 200);
-  spinReel("r3", 400);
+  spinReel("r1",0);
+  spinReel("r2",200);
+  spinReel("r3",400);
 }
 
-// spin animation
+// reel spin function
 function spinReel(id, delay){
   const reel = document.getElementById(id);
   let top = 0;
-  const speed = 20;
-  const imgHeight = 69;
-
   const interval = setInterval(()=>{
-    top -= 10;
-    if(top <= -imgHeight * reel.children.length) top = 0;
+    top -= 10;  // speed
+    if(top <= -68*15) top=0;  // reset after 15 images
     reel.style.transform = `translateY(${top}px)`;
-  }, speed);
+  },50);
 
   setTimeout(()=>{
     clearInterval(interval);
-    reel.style.transform = "translateY(0)";
-    createReel(id);
-    if(id === "r3") checkWin(); // check win after last reel
-  }, 2000 + delay);
+    checkWin();
+  }, 1500 + delay);
 }
 
-// check for adjacent matches
+// check visible gems for win (middle 3)
 function checkWin(){
-  let reels = [document.getElementById("r1"), document.getElementById("r2"), document.getElementById("r3")];
-  let visibleGems = [];
-
-  // get visible 3 gems from each reel (first 3 images)
-  reels.forEach(r => {
-    visibleGems.push(r.children[0].src);
-    visibleGems.push(r.children[1].src);
-    visibleGems.push(r.children[2].src);
+  const visible = 3;  // 3 gems visible
+  const winGems = [];
+  ["r1","r2","r3"].forEach(id=>{
+    const reel = document.getElementById(id);
+    const imgs = reel.querySelectorAll("img");
+    winGems.push([]);
+    for(let i=0;i<visible;i++){
+      winGems[winGems.length-1].push(imgs[i].src);
+    }
   });
 
-  let totalWin = 0;
-
-  // check horizontal rows
-  for(let row=0; row<3; row++){
-    let a = visibleGems[row];
-    let b = visibleGems[row+3];
-    let c = visibleGems[row+6];
-
-    if(a===b && b===c){
-      totalWin += 50; // 3 in a row big win
-      console.log("BIG WIN!", a, b, c);
-    } else if(a===b || b===c || a===c){
-      totalWin += 10; // 2 in a row normal win
-      console.log("WIN!", a, b, c);
-    }
+  // check matching consecutive gems in middle row
+  let middleRow = [winGems[0][1],winGems[1][1],winGems[2][1]];
+  if(middleRow[0]===middleRow[1] && middleRow[1]===middleRow[2]){
+    alert("BIG WIN! +100 coins");
+    coins += 100;
+  } else if(middleRow[0]===middleRow[1] || middleRow[1]===middleRow[2]){
+    alert("Win! +20 coins");
+    coins += 20;
+  } else{
+    alert("No Win");
+    coins -= 10;
   }
 
-  if(totalWin>0){
-    coins += totalWin;
-    coinsEl.textContent = coins;
-    alert("You won "+totalWin+" coins!");
-  } else {
-    console.log("No win this spin");
-  }
+  document.getElementById("coins").innerText = coins;
 }
