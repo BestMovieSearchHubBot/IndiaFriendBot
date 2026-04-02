@@ -53,7 +53,7 @@ body {
   height: 350px; /* Base height */
 }
 
-/* FRAME - Isko background-image ki tarah set kiya hai for better fit */
+/* FRAME - Isko bada karne ke liye */
 .frame {
   position: absolute;
   top: 0;
@@ -62,7 +62,12 @@ body {
   height: 100%;
   z-index: 3;
   pointer-events: none; /* Click reels ke piche na ruke */
+
+  /* 🔥 YEH LINE ADD KAREIN: Frame ko 1.2 guna bada karne ke liye (120% size) */
+  transform: scale(1.2); 
+  transform-origin: center; /* Frame apne center se bada hoga */
 }
+
 
 /* 🎰 REELS AREA */
 .reels {
