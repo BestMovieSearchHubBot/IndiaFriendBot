@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky Gems Slot</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
 
 <style>
+/* 🔴 GLOBAL FIXES: Scroll & Selection disable karne ke liye */
 * { 
   box-sizing: border-box; 
-  /* Long press/Selection disable karne ke liye */
-  -webkit-touch-callout: none; 
-  -webkit-user-select: none; 
-  user-select: none; 
-  /* Tap highlight hatane ke liye */
-  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none; /* iOS context menu prevent */
+  -webkit-user-select: none;   /* Disable selection */
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 body {
@@ -25,9 +25,7 @@ body {
   background: url('bg.jpg') no-repeat center center fixed;
   background-size: cover;
   height: 100vh;
-  overflow: hidden;
-  /* Screen bounce/scroll disable karne ke liye */
-  touch-action: none; 
+  overflow: hidden; /* Scroll disable */
 }
 
 /* TOP BAR */
@@ -53,58 +51,62 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 220px; /* Thoda adjust kiya hai balance ke liye */
+  margin-top: 260px; /* Adjust according to your screen */
   position: relative;
 }
 
 .machine {
   position: relative;
-  width: 350px; 
-  height: 350px; 
+  width: 350px; /* Base width */
+  height: 350px; /* Base height */
 }
 
 /* FRAME */
 .frame {
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 15px;
+  left: 2px;
   width: 100%;
   height: 100%;
   z-index: 3;
-  pointer-events: none; 
-  transform: scale(1.25); /* Halka sa aur bada kiya hai fitting ke liye */
+  pointer-events: none; /* Click reels ke piche na ruke */
+  transform: scale(1.2); 
   transform-origin: center;
 }
 
-/* 🎰 REELS AREA - GAPS FIX KIYE GAYE HAIN */
+/* 🎰 REELS AREA - Precision fitting changes */
 .reels {
   position: absolute;
-  top: 18px;    /* Frame ke boxes ke center mein laane ke liye */
-  left: -8px;   /* Side gaps fix karne ke liye shift kiya */
-  width: 365px; /* Width badhayi taaki gems side boxes mein jayein */
-  height: 310px; 
+  top: 55px;    /* Frame ke upar-neeche box position */
+  left: 20px;   /* Frame ke left box position */
+  width: 310px; /* Total width increased */
+  height: 270px; /* Total height increased */
   display: flex;
-  justify-content: center; /* Center alignment */
-  gap: 12px;    /* Columns ke beech ka gap */
   overflow: hidden; 
   z-index: 2;
+  /* 🔴 EXTRA LOCK: Long press disable on container level */
+  -webkit-touch-callout: none;
 }
 
 .reel {
   display: flex;
   flex-direction: column;
-  width: 85px;  /* Har gem box ki fixed width */
-  align-items: center;
+  width: 33.33%; /* Teen equal columns */
+  align-items: center; /* Gems center aligned horizontally */
+  gap: 12px;   /* Vertical gap between gems increased */
 }
 
 .reel img {
-  width: 85px;  /* Gems ka size bada kiya */
-  height: 85px; 
-  object-fit: contain;
-  margin-bottom: 18px; /* Do gems ke beech ka vertical gap */
+  width: 100px; /* Fixed larger size per gem */
+  height: 85px; /* Proportional height to fill the box */
+  object-fit: contain; /* Don't squash the gem */
+  display: block;
+  /* 🔴 EXTRA LOCK: Specific lock for images to prevent browser menu */
+  -webkit-touch-callout: none;
+  pointer-events: none; /* Click reels ke piche jaise spin handle ho */
 }
 
-/* SIDEBAR */
+/* SIDEBAR - In-game features */
 .sidebar {
   position: absolute;
   right: 5px;
@@ -161,13 +163,18 @@ body {
 }
 
 .spin:active {
-  transform: scale(0.95);
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #b35900;
 }
 </style>
+
 </head>
-<body oncontextmenu="return false;"> <div class="topbar">
+
+<body>
+
+<div class="topbar">
   <div>👤 Player</div>
-  <div class="coins">💰 <span id="coins">1030</span></div>
+  <div class="coins">💰 <span id="coins">1120</span></div>
 </div>
 
 <div class="machine-container">
