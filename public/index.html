@@ -10,11 +10,9 @@
 <style>
 * { 
   box-sizing: border-box; 
-  /* Long press/Selection disable karne ke liye */
   -webkit-touch-callout: none; 
   -webkit-user-select: none; 
   user-select: none; 
-  /* Tap highlight hatane ke liye */
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -26,7 +24,6 @@ body {
   background-size: cover;
   height: 100vh;
   overflow: hidden;
-  /* Screen bounce/scroll disable karne ke liye */
   touch-action: none; 
 }
 
@@ -53,7 +50,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 220px; /* Thoda adjust kiya hai balance ke liye */
+  margin-top: 220px; 
   position: relative;
 }
 
@@ -72,20 +69,20 @@ body {
   height: 100%;
   z-index: 3;
   pointer-events: none; 
-  transform: scale(1.25); /* Halka sa aur bada kiya hai fitting ke liye */
+  transform: scale(1.25); 
   transform-origin: center;
 }
 
-/* 🎰 REELS AREA - GAPS FIX KIYE GAYE HAIN */
+/* 🎰 REELS AREA */
 .reels {
   position: absolute;
-  top: 28px;    /* Frame ke boxes ke center mein laane ke liye */
-  left: -8px;   /* Side gaps fix karne ke liye shift kiya */
-  width: 365px; /* Width badhayi taaki gems side boxes mein jayein */
+  top: 28px;    
+  left: -8px;  
+  width: 365px; 
   height: 350px; 
   display: flex;
-  justify-content: center; /* Center alignment */
-  gap: 10px;    /* Columns ke beech ka gap */
+  justify-content: center; 
+  gap: 10px;    
   overflow: hidden; 
   z-index: 2;
 }
@@ -93,15 +90,15 @@ body {
 .reel {
   display: flex;
   flex-direction: column;
-  width: 85px;  /* Har gem box ki fixed width */
+  width: 85px;  
   align-items: center;
 }
 
 .reel img {
-  width: 85px;  /* Gems ka size bada kiya */
+  width: 85px;  
   height: 85px; 
   object-fit: contain;
-  margin-bottom: 18px; /* Do gems ke beech ka vertical gap */
+  margin-bottom: 18px; 
 }
 
 /* SIDEBAR */
@@ -166,12 +163,12 @@ body {
 
 /* 🔒 Long press / touch hold popup disable */
 img, .sidebtn, .spin, .reel {
-  -webkit-touch-callout: none;  /* iOS Safari long press menu disable */
+  -webkit-touch-callout: none;  
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  pointer-events: auto; /* images interactable, par long press blocked */
+  pointer-events: auto; 
 }
 </style>
 </head>
@@ -207,18 +204,18 @@ img, .sidebtn, .spin, .reel {
   <div class="spin" onclick="spin()">SPIN</div>
 </div>
 
+<!-- 🔹 Aapka original script.js -->
 <script src="script.js"></script>
 
+<!-- 🔒 Long press / touch hold block -->
 <script>
-// Long press / touch hold popups ko block karna
 document.addEventListener('DOMContentLoaded', () => {
   document.body.addEventListener('touchstart', function(e){
       if(e.target.tagName === 'IMG' || e.target.classList.contains('sidebtn') || e.target.classList.contains('spin')){
-          e.preventDefault(); // Prevent long press menu
+          e.preventDefault(); 
       }
   }, {passive: false});
 
-  // Desktop right-click bhi block
   document.body.addEventListener('contextmenu', e => e.preventDefault());
 });
 </script>
