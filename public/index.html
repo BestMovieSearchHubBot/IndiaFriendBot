@@ -201,23 +201,26 @@ img, .sidebtn, .spin, .reel {
     <span>BET 1</span>
     <span>+</span>
   </div>
-  <div class="spin" onclick="spin()">SPIN</div>
-</div>
+<!-- Example snippet -->
+<div class="spin" id="spinBtn">SPIN</div>
 
-<!-- 🔹 Aapka original script.js -->
 <script src="script.js"></script>
-
-<!-- 🔒 Long press / touch hold block -->
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  document.body.addEventListener('touchstart', function(e){
-      if(e.target.tagName === 'IMG' || e.target.classList.contains('sidebtn') || e.target.classList.contains('spin')){
-          e.preventDefault(); 
-      }
-  }, {passive: false});
+const spinBtn = document.getElementById('spinBtn');
 
-  document.body.addEventListener('contextmenu', e => e.preventDefault());
-});
+// Long press / contextmenu safe without blocking normal click
+spinBtn.addEventListener('touchstart', e => e.stopPropagation(), {passive:true});
+spinBtn.addEventListener('mousedown', e => e.stopPropagation());
+
+// Prevent general long press / right click
+document.body.addEventListener('contextmenu', e => e.preventDefault());
+document.body.addEventListener('touchstart', e => {
+    const t = e.target;
+    if (!t.classList.contains('spin') && !t.classList.contains('sidebtn') && t.tagName !== 'IMG') {
+        return; // only prevent default for unwanted elements
+    }
+    e.preventDefault();
+}, {passive:false});
 </script>
 
 </body>
