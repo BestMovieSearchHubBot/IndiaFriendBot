@@ -163,9 +163,20 @@ body {
 .spin:active {
   transform: scale(0.95);
 }
+
+/* 🔒 Long press / touch hold popup disable */
+img, .sidebtn, .spin, .reel {
+  -webkit-touch-callout: none;  /* iOS Safari long press menu disable */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  pointer-events: auto; /* images interactable, par long press blocked */
+}
 </style>
 </head>
-<body oncontextmenu="return false;"> <div class="topbar">
+<body oncontextmenu="return false;"> 
+<div class="topbar">
   <div>👤 Player</div>
   <div class="coins">💰 <span id="coins">1030</span></div>
 </div>
@@ -197,5 +208,20 @@ body {
 </div>
 
 <script src="script.js"></script>
+
+<script>
+// Long press / touch hold popups ko block karna
+document.addEventListener('DOMContentLoaded', () => {
+  document.body.addEventListener('touchstart', function(e){
+      if(e.target.tagName === 'IMG' || e.target.classList.contains('sidebtn') || e.target.classList.contains('spin')){
+          e.preventDefault(); // Prevent long press menu
+      }
+  }, {passive: false});
+
+  // Desktop right-click bhi block
+  document.body.addEventListener('contextmenu', e => e.preventDefault());
+});
+</script>
+
 </body>
 </html>
