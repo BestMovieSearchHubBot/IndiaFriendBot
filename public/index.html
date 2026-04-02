@@ -1,23 +1,33 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Lucky Gems Slot</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
 
 <style>
-* { box-sizing: border-box; }
+* { 
+  box-sizing: border-box; 
+  /* Long press/Selection disable karne ke liye */
+  -webkit-touch-callout: none; 
+  -webkit-user-select: none; 
+  user-select: none; 
+  /* Tap highlight hatane ke liye */
+  -webkit-tap-highlight-color: transparent;
+}
 
 body {
   margin: 0;
   padding: 0;
   font-family: 'Orbitron', sans-serif;
-  /* Full screen background fix */
   background: url('bg.jpg') no-repeat center center fixed;
   background-size: cover;
   height: 100vh;
   overflow: hidden;
+  /* Screen bounce/scroll disable karne ke liye */
+  touch-action: none; 
 }
 
 /* TOP BAR */
@@ -43,44 +53,39 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 260px; /* Adjust according to your screen */
+  margin-top: 220px; /* Thoda adjust kiya hai balance ke liye */
   position: relative;
 }
 
 .machine {
   position: relative;
-  width: 350px; /* Base width */
-  height: 350px; /* Base height */
+  width: 350px; 
+  height: 350px; 
 }
 
-/* FRAME - Isko bada karne ke liye */
+/* FRAME */
 .frame {
   position: absolute;
-  top: 15px;
-  left: 2;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   z-index: 3;
-  pointer-events: none; /* Click reels ke piche na ruke */
-
-  /* 🔥 YEH LINE ADD KAREIN: Frame ko 1.2 guna bada karne ke liye (120% size) */
-  transform: scale(1.2); 
-  transform-origin: center; /* Frame apne center se bada hoga */
+  pointer-events: none; 
+  transform: scale(1.25); /* Halka sa aur bada kiya hai fitting ke liye */
+  transform-origin: center;
 }
 
-
+/* 🎰 REELS AREA - GAPS FIX KIYE GAYE HAIN */
 .reels {
   position: absolute;
-  /* Frame bada hone par in values ko thoda adjust karna pad sakta hai */
-  top: 50px;    
-  left: 20px;   
-  
-  /* Width aur Height badhayi hai taaki bade gems fit ho sakein */
-  width: 300px; 
-  height: 270px; 
-  
+  top: 18px;    /* Frame ke boxes ke center mein laane ke liye */
+  left: -8px;   /* Side gaps fix karne ke liye shift kiya */
+  width: 365px; /* Width badhayi taaki gems side boxes mein jayein */
+  height: 310px; 
   display: flex;
-  justify-content: space-around;
+  justify-content: center; /* Center alignment */
+  gap: 12px;    /* Columns ke beech ka gap */
   overflow: hidden; 
   z-index: 2;
 }
@@ -88,21 +93,18 @@ body {
 .reel {
   display: flex;
   flex-direction: column;
-  /* Width ko 33% tak le ja sakte hain taaki gems side-to-side bade dikhen */
-  width: 33%; 
+  width: 85px;  /* Har gem box ki fixed width */
+  align-items: center;
 }
 
 .reel img {
-  width: 100%;
-  /* Height ko 75px se badha kar 88px kiya hai (taaki 3 gems 270px mein fit hon) */
-  height: 88px; 
+  width: 85px;  /* Gems ka size bada kiya */
+  height: 85px; 
   object-fit: contain;
-  /* Vertical gap ko thoda badhaya hai */
-  margin-bottom: 5px; 
+  margin-bottom: 18px; /* Do gems ke beech ka vertical gap */
 }
 
-
-/* SIDEBAR - In-game features */
+/* SIDEBAR */
 .sidebar {
   position: absolute;
   right: 5px;
@@ -159,18 +161,13 @@ body {
 }
 
 .spin:active {
-  transform: translateY(2px);
-  box-shadow: 0 2px 0 #b35900;
+  transform: scale(0.95);
 }
 </style>
-
 </head>
-
-<body>
-
-<div class="topbar">
+<body oncontextmenu="return false;"> <div class="topbar">
   <div>👤 Player</div>
-  <div class="coins">💰 <span id="coins">1010</span></div>
+  <div class="coins">💰 <span id="coins">1030</span></div>
 </div>
 
 <div class="machine-container">
