@@ -84,25 +84,37 @@ function checkWin(){
   });
 
   let totalWin = 0;
+  let glowTargets = [];
 
   // check horizontal rows
   for(let row=0; row<3; row++){
-    let a = visibleGems[row];
-    let b = visibleGems[row+3];
-    let c = visibleGems[row+6];
+    let a = reels[0].children[row];
+    let b = reels[1].children[row];
+    let c = reels[2].children[row];
 
-    if(a===b && b===c){
+    if(a.src===b.src && b.src===c.src){
       totalWin += 50; // 3 in a row big win
-      console.log("BIG WIN!", a, b, c);
-    } else if(a===b || b===c || a===c){
+      glowTargets.push(a,b,c);
+      console.log("BIG WIN!", a.src, b.src, c.src);
+    } else if(a.src===b.src || b.src===c.src || a.src===c.src){
       totalWin += 10; // 2 in a row normal win
-      console.log("WIN!", a, b, c);
+      // add only matching 2 for glow
+      if(a.src===b.src) glowTargets.push(a,b);
+      if(b.src===c.src) glowTargets.push(b,c);
+      if(a.src===c.src) glowTargets.push(a,c);
+      console.log("WIN!", a.src, b.src, c.src);
     }
   }
 
   if(totalWin>0){
     coins += totalWin;
     coinsEl.textContent = coins;
+    // Add glow effect
+    glowTargets.forEach(img => img.classList.add("glow"));
+    setTimeout(()=>{
+      glowTargets.forEach(img => img.classList.remove("glow"));
+    }, 1500);
+
     alert("You won "+totalWin+" coins!");
   } else {
     console.log("No win this spin");
