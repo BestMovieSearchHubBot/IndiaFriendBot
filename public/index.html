@@ -41,7 +41,7 @@ body{
 /* FRAME */
 .frame{
   position:absolute;
-  top:23px;    /* 👈 default 0 tha, ab 10px niche */
+  top:25px;    /* 👈 default 0 tha, ab 10px niche */
   width:100%;
   z-index:3;
 }
@@ -52,12 +52,11 @@ body{
   top:70px;
   left:25px;
   width:270px;
-  height:210px;
+  height:210px; /* 3 gems visible */
   display:flex;
-  justify-content:center;
+  justify-content:space-between; /* evenly spread reels */
   overflow:hidden; 
   z-index:2;
-  gap:0; /* remove any gap */
 }
 
 .reel{
@@ -72,10 +71,11 @@ body{
 }
 
 .reel img{
-  width:78%;
+  width:78%;       /* ya apne design ke hisab se */
   height:68px;
   object-fit:contain;
   display:block;
+  margin:0 auto;   /* horizontal center */
 }
 
 /* SIDEBAR */
