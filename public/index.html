@@ -99,6 +99,7 @@ body {
   height: 85px; 
   object-fit: contain;
   margin-bottom: 18px; 
+  transition: transform 0.3s, filter 0.3s;
 }
 
 /* SIDEBAR */
@@ -170,6 +171,17 @@ img, .sidebtn, .spin, .reel {
   user-select: none;
   pointer-events: auto; 
 }
+
+/* ✨ WIN GLOW ANIMATION */
+@keyframes winGlow {
+  0% { transform: scale(1); filter: drop-shadow(0 0 0px gold); }
+  50% { transform: scale(1.2); filter: drop-shadow(0 0 15px gold); }
+  100% { transform: scale(1); filter: drop-shadow(0 0 0px gold); }
+}
+
+.win {
+  animation: winGlow 0.8s ease-in-out 3;
+}
 </style>
 </head>
 <body oncontextmenu="return false;"> 
@@ -201,8 +213,8 @@ img, .sidebtn, .spin, .reel {
     <span>BET 1</span>
     <span>+</span>
   </div>
-<!-- Example snippet -->
-<div class="spin" id="spinBtn">SPIN</div>
+  <div class="spin" id="spinBtn">SPIN</div>
+</div>
 
 <script src="script.js"></script>
 <script>
@@ -222,10 +234,28 @@ document.body.addEventListener('contextmenu', e => e.preventDefault());
 document.body.addEventListener('touchstart', e => {
     const t = e.target;
     if (!t.classList.contains('spin') && !t.classList.contains('sidebtn') && t.tagName !== 'IMG') {
-        return; // only prevent default for unwanted elements
+        return; 
     }
     e.preventDefault();
 }, {passive:false});
+
+/* 🔹 WIN GLOW JS HELPER */
+function handleWin(winPositions) {
+  // winPositions = [{reel:'r1', index:1}, ...]
+  winPositions.forEach(pos => {
+    const reel = document.getElementById(pos.reel);
+    const gem = reel.children[pos.index];
+    if(gem) {
+      gem.classList.add('win');
+      gem.addEventListener('animationend', () => {
+        gem.classList.remove('win');
+      });
+    }
+  });
+}
+
+// Example usage: middle gems glow
+// handleWin([{reel:'r1', index:1}, {reel:'r2', index:1}, {reel:'r3', index:1}]);
 </script>
 
 </body>
