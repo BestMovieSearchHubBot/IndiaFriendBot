@@ -1,162 +1,569 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Lucky Gems Slot</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Lucky Gems Slot | Professional Slot Machine</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* 🔥 GLOBAL FIXES - NO ZOOM, NO SELECTION, NO SCROLL */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+    body {
+      font-family: 'Orbitron', monospace;
+      background: url('bg.jpg') no-repeat center center fixed;
+      background-size: cover;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+      touch-action: pan-x pan-y;  /* zoom block */
+    }
 
-<style>
-/* 🔴 ZOOM & SELECTION KILLER */
-* { 
-  box-sizing: border-box; 
-  -webkit-touch-callout: none; 
-  -webkit-user-select: none; 
-  user-select: none;
-  /* Zoom ko browser level par block karne ke liye */
-  touch-action: none; 
-  -webkit-tap-highlight-color: transparent;
-}
+    /* disable pinch zoom completely */
+    body * {
+      touch-action: manipulation;
+    }
 
-body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Orbitron', sans-serif;
-  background: url('bg.jpg') no-repeat center center fixed;
-  background-size: cover;
-  height: 100vh;
-  overflow: hidden;
-  position: fixed; /* Screen hilne se rokne ke liye */
-  width: 100%;
-}
+    /* TOP BAR - premium glass */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 24px;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 215, 0, 0.5);
+      color: white;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+    .coins {
+      background: linear-gradient(145deg, #1e1a0c, #000000);
+      padding: 8px 20px;
+      border-radius: 40px;
+      border: 1px solid #ffd700;
+      box-shadow: 0 0 10px rgba(255,215,0,0.3);
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #ffec80;
+    }
+    .coins i {
+      margin-right: 8px;
+      color: #ffd966;
+    }
 
-/* MACHINE CONTAINER */
-.machine-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 250px; 
-  position: relative;
-}
+    /* MACHINE CONTAINER - proper centering */
+    .machine-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: calc(100vh - 130px);
+      position: relative;
+      padding: 20px;
+    }
 
-.machine {
-  position: relative;
-  width: 350px; 
-  height: 350px; 
-}
+    /* MACHINE CORE */
+    .machine {
+      position: relative;
+      width: 450px;
+      max-width: 85vw;
+      height: auto;
+      min-height: 400px;
+    }
 
-/* FRAME */
-.frame {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 3;
-  pointer-events: none; 
-  transform: scale(1.28); /* Thoda bada kiya taaki gaps cover hon */
-  transform-origin: center;
-}
+    /* FRAME IMAGE - precise fitting, no extra scale distortion */
+    .frame {
+      position: absolute;
+      top: -5px;
+      left: -5px;
+      width: calc(100% + 10px);
+      height: calc(100% + 10px);
+      z-index: 10;
+      pointer-events: none;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 12px rgba(0,0,0,0.6));
+    }
 
-/* 🎰 REELS AREA - GAPS & ALIGNMENT FIXED */
-.reels {
-  position: absolute;
-  top: 38px;    /* Gems ko boxes mein center laane ke liye thoda niche kiya */
-  left: 0px;    /* Side gaps fix karne ke liye zero kiya */
-  width: 350px; /* Frame ki base width ke barabar */
-  height: 290px; 
-  display: flex;
-  justify-content: center; /* Columns ko beech mein rakhega */
-  gap: 15px;    /* Har line ke beech ka gap */
-  overflow: hidden; 
-  z-index: 2;
-}
+    /* REELS AREA - perfectly inside frame */
+    .reels {
+      position: relative;
+      z-index: 5;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(2px);
+      border-radius: 32px;
+      padding: 20px 12px;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      width: 100%;
+      margin-top: 35px;
+    }
 
-.reel {
-  display: flex;
-  flex-direction: column;
-  width: 92px;  /* Har gem column ki width */
-  align-items: center;
-}
+    /* each reel column */
+    .reel {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 33.33%;
+      background: rgba(0,0,0,0.5);
+      border-radius: 28px;
+      padding: 12px 5px;
+      box-shadow: inset 0 0 0 1px rgba(255,215,0,0.3), 0 8px 18px black;
+    }
 
-.reel img {
-  width: 92px;  
-  height: 85px; 
-  object-fit: contain;
-  margin-bottom: 12px; /* Do gems ke beech ka vertical gap */
-  display: block;
-  pointer-events: none;
-}
+    /* symbol style - professional gem look (no external images needed) */
+    .gem-symbol {
+      background: radial-gradient(circle at 30% 25%, #2c241a, #0f0b07);
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 20px;
+      font-size: 2.8rem;
+      color: #ffdd99;
+      text-shadow: 0 0 6px currentColor;
+      border: 1px solid rgba(255,215,0,0.7);
+      box-shadow: 0 5px 0 #3a2a18;
+      transition: 0.08s linear;
+    }
 
-/* SIDEBAR & CONTROLS (Same as before) */
-.sidebar {
-  position: absolute;
-  right: 5px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  z-index: 4;
-}
+    /* SIDEBAR - premium right side */
+    .sidebar {
+      position: absolute;
+      right: -20px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      z-index: 20;
+    }
+    .sidebtn {
+      background: linear-gradient(145deg, #2a1f3a, #130b1f);
+      backdrop-filter: blur(8px);
+      padding: 14px 12px;
+      border-radius: 28px;
+      color: #ffeaac;
+      text-align: center;
+      font-size: 0.9rem;
+      font-weight: bold;
+      border: 1px solid #ffbb55;
+      box-shadow: 0 8px 14px rgba(0,0,0,0.4);
+      cursor: pointer;
+      transition: 0.1s linear;
+      min-width: 85px;
+    }
+    .sidebtn i {
+      font-size: 1.7rem;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .sidebtn:active {
+      transform: scale(0.96);
+    }
 
-.sidebtn {
-  background: linear-gradient(180deg, #9c27b0, #4a148c);
-  padding: 10px 8px;
-  border-radius: 8px;
-  color: white;
-  text-align: center;
-  font-size: 11px;
-}
+    /* CONTROLS PANEL */
+    .controls {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(15px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 25px;
+      border-top: 2px solid #ffd966;
+      z-index: 30;
+      flex-wrap: wrap;
+    }
+    .bet-control {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      background: #0c0b12;
+      padding: 6px 18px;
+      border-radius: 60px;
+      border: 1px solid #f3b33d;
+    }
+    .bet-control span {
+      font-size: 1.8rem;
+      font-weight: 900;
+      cursor: pointer;
+      color: #ffcd7e;
+      width: 40px;
+      text-align: center;
+    }
+    .bet-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: #000000aa;
+      padding: 0 20px;
+      border-radius: 30px;
+      color: #ffd966;
+    }
+    .spin {
+      background: linear-gradient(135deg, #ffb300, #fb8c00);
+      padding: 12px 42px;
+      border-radius: 50px;
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: #1f1a0a;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #b35900;
+      transition: 0.05s linear;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .spin:active {
+      transform: translateY(3px);
+      box-shadow: 0 3px 0 #b35900;
+    }
+    .win-area {
+      background: #111111bb;
+      padding: 8px 22px;
+      border-radius: 40px;
+      font-size: 1rem;
+      font-weight: bold;
+      color: #ffde9c;
+    }
 
-.controls {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  background: rgba(0, 0, 0, 0.85);
-  display: flex;
-  justify-content: space-around;
-  padding: 15px;
-  z-index: 10;
-}
+    @media (max-width: 650px) {
+      .reel { gap: 8px; padding: 8px 3px; }
+      .gem-symbol { font-size: 1.8rem; }
+      .sidebtn { padding: 8px 6px; min-width: 65px; font-size: 0.7rem; }
+      .sidebtn i { font-size: 1.2rem; }
+      .spin { padding: 8px 28px; font-size: 1.2rem; }
+      .bet-value { font-size: 1.1rem; }
+      .bet-control span { font-size: 1.4rem; width: 30px; }
+      .win-area { font-size: 0.7rem; padding: 4px 12px; }
+    }
 
-.spin {
-  background: orange;
-  padding: 12px 40px;
-  border-radius: 30px;
-  font-weight: bold;
-}
-</style>
+    .disable-spin {
+      pointer-events: none;
+      opacity: 0.6;
+      filter: grayscale(0.2);
+    }
+
+    @keyframes winFlash {
+      0% { text-shadow: 0 0 0 gold; background: rgba(255,215,0,0.1);}
+      100% { text-shadow: 0 0 12px gold; background: rgba(255,215,0,0.5);}
+    }
+    .win-glow {
+      animation: winFlash 0.25s ease-in-out 3;
+    }
+  </style>
 </head>
-<body oncontextmenu="return false;">
+<body>
+
+<div class="topbar">
+  <div><i class="fas fa-user-astronaut"></i> LUCKY GEMS</div>
+  <div class="coins"><i class="fas fa-coins"></i> <span id="coins">1120</span></div>
+</div>
 
 <div class="machine-container">
   <div class="machine">
-    <img src="frame.png" class="frame">
-    <div class="reels">
-      <div class="reel" id="r1"></div>
-      <div class="reel" id="r2"></div>
-      <div class="reel" id="r3"></div>
+    <img src="frame.png" class="frame" alt="slot frame">
+    <div class="reels" id="reelsContainer">
+      <!-- 3 reels dynamically created by JS -->
     </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebtn" id="bonusBtn"><i class="fas fa-gift"></i> BONUS</div>
+    <div class="sidebtn" id="jackpot500"><i class="fas fa-crown"></i> 500x</div>
+    <div class="sidebtn" id="jackpot100"><i class="fas fa-diamond"></i> 100x</div>
   </div>
 </div>
 
 <div class="controls">
-  <div class="spin" onclick="spin()">SPIN</div>
+  <div class="bet-control">
+    <span id="betMinus">−</span>
+    <span class="bet-value" id="betAmount">1</span>
+    <span id="betPlus">+</span>
+  </div>
+  <div class="win-area" id="winMessage"><i class="fas fa-chart-simple"></i> SPIN TO WIN</div>
+  <div class="spin" id="spinBtn">SPIN</div>
 </div>
 
 <script>
-// Zoom rokne ke liye ek extra safety script
-document.addEventListener('touchstart', function (event) {
-  if (event.touches.length > 1) {
-    event.preventDefault();
-  }
-}, { passive: false });
+  // ---------- PREMIUM GEMS DATABASE ----------
+  const GEMS = [
+    { id: 'diamond', name: '💎 DIAMOND', icon: 'fas fa-gem', color: '#7df9ff', multiplier: 12 },
+    { id: 'ruby', name: '🔥 RUBY', icon: 'fas fa-fire', color: '#ff4d6d', multiplier: 8 },
+    { id: 'gold', name: '💰 GOLD', icon: 'fas fa-coins', color: '#ffd966', multiplier: 5 },
+    { id: 'star', name: '⭐ STAR', icon: 'fas fa-star', color: '#ffe484', multiplier: 3 },
+    { id: 'clover', name: '🍀 CLOVER', icon: 'fas fa-leaf', color: '#6fcf97', multiplier: 2 },
+    { id: 'crown', name: '👑 CROWN', icon: 'fas fa-crown', color: '#c77dff', multiplier: 10 }
+  ];
 
-document.addEventListener('gesturestart', function (event) {
-  event.preventDefault();
-});
+  // Game state
+  let balance = 1120;
+  let currentBet = 1;
+  let spinning = false;
+  let reelMatrix = [];   // [reelIndex][rowIndex] -> gem object
+
+  // DOM elements
+  const balanceSpan = document.getElementById('coins');
+  const betAmountSpan = document.getElementById('betAmount');
+  const winMessageDiv = document.getElementById('winMessage');
+  const spinButton = document.getElementById('spinBtn');
+  const reelsContainer = document.getElementById('reelsContainer');
+
+  // Helper: random gem
+  function getRandomGem() {
+    return { ...GEMS[Math.floor(Math.random() * GEMS.length)] };
+  }
+
+  // Initialize random 3x3 matrix
+  function initRandomMatrix() {
+    const matrix = [];
+    for (let reel = 0; reel < 3; reel++) {
+      const col = [];
+      for (let row = 0; row < 3; row++) {
+        col.push(getRandomGem());
+      }
+      matrix.push(col);
+    }
+    return matrix;
+  }
+
+  // Render reels UI from matrix
+  function renderReels(matrix) {
+    for (let reelIdx = 0; reelIdx < 3; reelIdx++) {
+      const reelDiv = document.getElementById(`reel-${reelIdx}`);
+      if (!reelDiv) continue;
+      const symbols = reelDiv.querySelectorAll('.gem-symbol');
+      for (let rowIdx = 0; rowIdx < 3; rowIdx++) {
+        const gem = matrix[reelIdx][rowIdx];
+        const iconElem = symbols[rowIdx].querySelector('i');
+        if (iconElem) {
+          iconElem.className = gem.icon;
+          iconElem.style.color = gem.color;
+          iconElem.style.textShadow = `0 0 6px ${gem.color}`;
+        }
+      }
+    }
+  }
+
+  // Calculate win on 3 paylines (top, middle, bottom)
+  function calculateWin(matrix, bet) {
+    let totalWin = 0;
+    let winDetails = [];
+    for (let row = 0; row < 3; row++) {
+      const gem0 = matrix[0][row];
+      const gem1 = matrix[1][row];
+      const gem2 = matrix[2][row];
+      if (gem0.id === gem1.id && gem1.id === gem2.id) {
+        const winAmount = bet * gem0.multiplier;
+        totalWin += winAmount;
+        winDetails.push(`${gem0.name} x${gem0.multiplier} = ${winAmount}`);
+      }
+    }
+    return { totalWin, winDetails };
+  }
+
+  // Update balance UI
+  function updateBalanceUI() {
+    balanceSpan.innerText = Math.floor(balance);
+  }
+
+  // Show win animation
+  function showWinAnimation(winAmount, winDetails) {
+    if (winAmount > 0) {
+      winMessageDiv.innerHTML = `<i class="fas fa-trophy"></i> WIN ${winAmount} 🎉`;
+      winMessageDiv.style.background = "#2c1a0fcc";
+      winMessageDiv.style.border = "1px solid gold";
+      // glow effect on all symbols
+      document.querySelectorAll('.gem-symbol').forEach(s => s.classList.add('win-glow'));
+      setTimeout(() => {
+        document.querySelectorAll('.gem-symbol').forEach(s => s.classList.remove('win-glow'));
+      }, 500);
+    } else {
+      winMessageDiv.innerHTML = `<i class="fas fa-chart-simple"></i> TRY AGAIN`;
+      winMessageDiv.style.background = "#111111bb";
+    }
+    setTimeout(() => {
+      if (winMessageDiv.innerHTML.includes("WIN") || winMessageDiv.innerHTML.includes("TRY")) {
+        winMessageDiv.innerHTML = `<i class="fas fa-chart-simple"></i> SPIN TO WIN`;
+        winMessageDiv.style.background = "#111111bb";
+      }
+    }, 2500);
+  }
+
+  // MAIN SPIN FUNCTION (with animation)
+  async function spinGame() {
+    if (spinning) return;
+    if (balance < currentBet) {
+      winMessageDiv.innerHTML = "⚠️ INSUFFICIENT BALANCE ⚠️";
+      winMessageDiv.style.background = "#4a0000";
+      setTimeout(() => {
+        if (winMessageDiv.innerHTML.includes("INSUFFICIENT")) 
+          winMessageDiv.innerHTML = `<i class="fas fa-chart-simple"></i> SPIN TO WIN`;
+      }, 1500);
+      return;
+    }
+
+    spinning = true;
+    spinButton.classList.add('disable-spin');
+    
+    // deduct bet
+    balance -= currentBet;
+    updateBalanceUI();
+
+    // ---- FLICKER ANIMATION (8 steps) ----
+    let steps = 10;
+    let intervalTime = 60;
+    let finalMatrix = null;
+
+    await new Promise((resolve) => {
+      let step = 0;
+      const interval = setInterval(() => {
+        if (step >= steps) {
+          clearInterval(interval);
+          // final result matrix
+          finalMatrix = initRandomMatrix();
+          reelMatrix = finalMatrix;
+          renderReels(reelMatrix);
+          
+          // calculate win
+          const { totalWin, winDetails } = calculateWin(reelMatrix, currentBet);
+          if (totalWin > 0) {
+            balance += totalWin;
+            updateBalanceUI();
+            showWinAnimation(totalWin, winDetails);
+            // extra bonus sound effect vibe
+          } else {
+            showWinAnimation(0, []);
+          }
+          resolve(true);
+        } else {
+          // show random flicker
+          const flickerMatrix = initRandomMatrix();
+          renderReels(flickerMatrix);
+        }
+        step++;
+      }, intervalTime);
+    });
+
+    spinning = false;
+    spinButton.classList.remove('disable-spin');
+  }
+
+  // BONUS FEATURE (free coins)
+  function giveBonus() {
+    if (spinning) {
+      winMessageDiv.innerHTML = "⏳ SPINNING... WAIT!";
+      return;
+    }
+    const bonusAmount = Math.floor(Math.random() * 90) + 30; // 30 to 120
+    balance += bonusAmount;
+    updateBalanceUI();
+    winMessageDiv.innerHTML = `🎁 BONUS! +${bonusAmount} COINS 🎁`;
+    winMessageDiv.style.background = "#2d2b10cc";
+    setTimeout(() => {
+      if (winMessageDiv.innerHTML.includes("BONUS")) 
+        winMessageDiv.innerHTML = `<i class="fas fa-chart-simple"></i> SPIN TO WIN`;
+    }, 2000);
+    // button press effect
+    const bonusBtn = document.getElementById('bonusBtn');
+    bonusBtn.style.transform = "scale(0.95)";
+    setTimeout(() => bonusBtn.style.transform = "", 150);
+  }
+
+  // BET ADJUST
+  function changeBet(delta) {
+    if (spinning) return;
+    let newBet = currentBet + delta;
+    if (newBet < 1) newBet = 1;
+    if (newBet > 100) newBet = 100;
+    currentBet = newBet;
+    betAmountSpan.innerText = currentBet;
+  }
+
+  // JACKPOT INFO (500x / 100x)
+  function showJackpotInfo(type) {
+    if (spinning) return;
+    if (type === 500) {
+      winMessageDiv.innerHTML = "🏆 JACKPOT 500x! 👑 CROWN + CROWN + CROWN = 500x BET!";
+    } else {
+      winMessageDiv.innerHTML = "💎 DIAMOND TRIPLE = 100x MULTIPLIER! SPIN NOW!";
+    }
+    winMessageDiv.style.background = "#3a2a1a";
+    setTimeout(() => {
+      if (winMessageDiv.innerHTML.includes("JACKPOT") || winMessageDiv.innerHTML.includes("DIAMOND")) 
+        winMessageDiv.innerHTML = `<i class="fas fa-chart-simple"></i> SPIN TO WIN`;
+    }, 2000);
+  }
+
+  // ---------- BUILD REELS STRUCTURE DYNAMICALLY ----------
+  function buildReels() {
+    reelsContainer.innerHTML = '';
+    for (let i = 0; i < 3; i++) {
+      const reelDiv = document.createElement('div');
+      reelDiv.className = 'reel';
+      reelDiv.id = `reel-${i}`;
+      for (let row = 0; row < 3; row++) {
+        const symbolDiv = document.createElement('div');
+        symbolDiv.className = 'gem-symbol';
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-gem';
+        icon.style.color = '#7df9ff';
+        symbolDiv.appendChild(icon);
+        reelDiv.appendChild(symbolDiv);
+      }
+      reelsContainer.appendChild(reelDiv);
+    }
+  }
+
+  // initial matrix with some cool gems
+  function setInitialMatrix() {
+    const initial = [
+      [GEMS[0], GEMS[2], GEMS[4]],
+      [GEMS[1], GEMS[0], GEMS[3]],
+      [GEMS[5], GEMS[1], GEMS[2]]
+    ];
+    reelMatrix = initial;
+    renderReels(reelMatrix);
+  }
+
+  // INIT GAME
+  function initGame() {
+    buildReels();
+    setInitialMatrix();
+    updateBalanceUI();
+    betAmountSpan.innerText = currentBet;
+
+    // Event listeners
+    spinButton.addEventListener('click', spinGame);
+    document.getElementById('betMinus').addEventListener('click', () => changeBet(-1));
+    document.getElementById('betPlus').addEventListener('click', () => changeBet(1));
+    document.getElementById('bonusBtn').addEventListener('click', giveBonus);
+    document.getElementById('jackpot500').addEventListener('click', () => showJackpotInfo(500));
+    document.getElementById('jackpot100').addEventListener('click', () => showJackpotInfo(100));
+  }
+
+  // ZOOM PROTECTION & TOUCH
+  document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
+  document.addEventListener('touchmove', function(e) {
+    if (e.scale && e.scale !== 1) e.preventDefault();
+  }, { passive: false });
+  
+  // start the game
+  initGame();
 </script>
 </body>
 </html>
