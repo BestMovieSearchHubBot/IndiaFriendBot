@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="hi">
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lucky Gems Slot</title>
@@ -7,106 +7,148 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
 
 <style>
-body{
-  margin:0;
-  font-family:'Orbitron',sans-serif;
-  background:url('bg.jpg') no-repeat center/cover;
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Orbitron', sans-serif;
+  /* Full screen background fix */
+  background: url('bg.jpg') no-repeat center center fixed;
+  background-size: cover;
+  height: 100vh;
+  overflow: hidden;
 }
 
-/* TOP */
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  padding:10px;
-  background: rgba(255,255,255,0.6);
+/* TOP BAR */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(5px);
+  color: white;
 }
 
-.coins{
-  background:#111;
-  padding:5px 15px;
-  border-radius:20px;
-  color:white;
+.coins {
+  background: #111;
+  padding: 5px 15px;
+  border-radius: 20px;
+  border: 1px solid #ffd700;
 }
 
-/* MACHINE */
-.machine{
-  position:relative;
-  width:320px;
-  margin:auto;
-  margin-top:20px;
-  transform: scale(1.3);   
-  transform-origin: top center;
+/* MACHINE CONTAINER */
+.machine-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 40px; /* Adjust according to your screen */
+  position: relative;
 }
 
-/* FRAME */
-.frame{
-  position:absolute;
-  width:100%;
-  z-index:3;
+.machine {
+  position: relative;
+  width: 320px; /* Base width */
+  height: 320px; /* Base height */
 }
 
-/* 🎰 REELS */
-.reels{
-  position:absolute;
-  top:70px;
-  left:25px;
-  width:270px;
-  height:210px; /* 3 gems visible */
-  display:flex;
-  justify-content:space-between;
-  overflow:hidden; 
-  z-index:2;
+/* FRAME - Isko background-image ki tarah set kiya hai for better fit */
+.frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none; /* Click reels ke piche na ruke */
 }
 
-.reel{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:1px;   
+/* 🎰 REELS AREA */
+.reels {
+  position: absolute;
+  top: 45px;    /* Frame ke holes ke hisab se adjust karein */
+  left: 28px;   /* Frame ke holes ke hisab se adjust karein */
+  width: 264px; /* Total width of 3 columns */
+  height: 225px; /* Height of 3 rows */
+  display: flex;
+  justify-content: space-around;
+  overflow: hidden; 
+  z-index: 2;
 }
 
-.reel img{
-  width:78%;
-  height:68px;
-  object-fit:contain;
-  display:block;
+.reel {
+  display: flex;
+  flex-direction: column;
+  width: 30%;
 }
 
-/* SIDEBAR */
-.sidebar{
-  position:absolute;
-  right:10px;
-  top:100px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
+.reel img {
+  width: 100%;
+  height: 75px; /* height = reels height / 3 */
+  object-fit: contain;
+  margin-bottom: 2px;
 }
 
-.sidebtn{
-  background:purple;
-  padding:15px;
-  border-radius:10px;
-  color:white;
-  text-align:center;
+/* SIDEBAR - In-game features */
+.sidebar {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 4;
+}
+
+.sidebtn {
+  background: linear-gradient(180deg, #9c27b0, #4a148c);
+  padding: 12px 8px;
+  border-radius: 8px;
+  color: white;
+  text-align: center;
+  font-size: 12px;
+  border: 1px solid #ffffff50;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
 
 /* CONTROLS */
-.controls{
-  position:fixed;
-  bottom:0;
-  width:100%;
-  background:rgba(0,0,0,0.7);
-  display:flex;
-  justify-content:space-around;
-  padding:10px;
+.controls {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 25px;
+  color: white;
+  border-top: 2px solid #444;
 }
 
-.spin{
-  background:orange;
-  padding:15px 30px;
-  border-radius:50px;
-  font-size:18px;
-  cursor:pointer;
+.bet-control {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-size: 18px;
+}
+
+.spin {
+  background: linear-gradient(180deg, #ffb300, #fb8c00);
+  padding: 12px 40px;
+  border-radius: 30px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #000;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #b35900;
+  transition: 0.1s;
+}
+
+.spin:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #b35900;
 }
 </style>
 
@@ -116,28 +158,32 @@ body{
 
 <div class="topbar">
   <div>👤 Player</div>
-  <div class="coins">💰 <span id="coins">1000</span></div>
+  <div class="coins">💰 <span id="coins">1010</span></div>
 </div>
 
-<div class="machine">
-  <img src="frame.png" class="frame">
-  <div class="reels">
-    <div class="reel" id="r1"></div>
-    <div class="reel" id="r2"></div>
-    <div class="reel" id="r3"></div>
+<div class="machine-container">
+  <div class="machine">
+    <img src="frame.png" class="frame">
+    <div class="reels">
+      <div class="reel" id="r1"></div>
+      <div class="reel" id="r2"></div>
+      <div class="reel" id="r3"></div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebtn">🎁 Bonus</div>
+    <div class="sidebtn">500x</div>
+    <div class="sidebtn">100x</div>
   </div>
 </div>
 
-<div class="sidebar">
-  <div class="sidebtn">🎁 Bonus</div>
-  <div class="sidebtn">500x</div>
-  <div class="sidebtn">100x</div>
-</div>
-
 <div class="controls">
-  <div>-</div>
-  <div>BET 1</div>
-  <div>+</div>
+  <div class="bet-control">
+    <span>-</span>
+    <span>BET 1</span>
+    <span>+</span>
+  </div>
   <div class="spin" onclick="spin()">SPIN</div>
 </div>
 
