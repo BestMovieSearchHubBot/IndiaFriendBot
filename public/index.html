@@ -41,7 +41,7 @@ body{
 /* FRAME */
 .frame{
   position:absolute;
-  top:20px;    /* 👈 default 0 tha, ab 10px niche */
+  top:23px;    /* 👈 default 0 tha, ab 10px niche */
   width:100%;
   z-index:3;
 }
@@ -52,12 +52,16 @@ body{
   top:70px;
   left:25px;
   width:270px;
-  height:210px; /* 3 gems visible */
+  height:210px;
   display:flex;
-  justify-content:center; /* <-- center align reels */
-  gap:-10px;               /* <-- reels ke beech ka horizontal spacing, adjust as needed */
+  justify-content:center;
   overflow:hidden; 
   z-index:2;
+  gap:0; /* remove any gap */
+}
+
+.reel{
+  margin:0 2px; /* adjust horizontal spacing exactly */
 }
 
 .reel{
