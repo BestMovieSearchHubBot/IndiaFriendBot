@@ -170,14 +170,13 @@ body {
   cursor: pointer;
 }
 
-/* ✨ UPDATED: PREMIUM BIG WIN POP-UP */
+/* ✨ NEW: WIN OVERLAY STYLE (CASINO TYPE) */
 #winOverlay {
   display: none; 
   position: fixed; 
   top: 0; left: 0; 
   width: 100%; height: 100%; 
-  background: rgba(0,0,0,0.85); 
-  backdrop-filter: blur(5px);
+  background: rgba(0,0,0,0.9); 
   z-index: 1000; 
   flex-direction: column; 
   justify-content: center; 
@@ -187,69 +186,53 @@ body {
 .win-box {
   position: relative;
   text-align: center;
-  z-index: 1001;
-  animation: winPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .win-title {
   font-weight: 900;
-  font-size: 65px;
-  margin: 0;
-  background: linear-gradient(to bottom, #fff7ad 0%, #ffa200 45%, #ffcc00 50%, #805500 100%);
+  font-size: 50px;
+  background: linear-gradient(to bottom, #fff700, #ff8c00);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 15px gold) drop-shadow(0 5px 2px #000);
-  letter-spacing: 2px;
+  filter: drop-shadow(0 0 15px gold);
+  margin: 0;
 }
 
 .win-amount {
-  font-size: 42px;
-  color: #fff;
-  margin: 10px 0 25px 0;
-  font-weight: bold;
-  text-shadow: 0 0 20px gold, 0 0 10px #ff8c00;
+  font-size: 35px;
+  color: white;
+  margin: 15px 0;
+  text-shadow: 0 0 10px #00fff2;
 }
 
 .collect-btn {
-  padding: 15px 60px;
-  font-size: 20px;
+  padding: 15px 50px;
+  font-size: 18px;
   font-family: 'Orbitron';
-  background: linear-gradient(180deg, #ffeb3b, #fbc02d);
-  border: 3px solid #ff9800;
+  background: linear-gradient(180deg, #ffb300, #fb8c00);
+  border: none;
   border-radius: 50px;
-  color: #3e2723;
-  font-weight: 900;
+  color: #000;
+  font-weight: bold;
   cursor: pointer;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 0 10px white;
-  transition: transform 0.2s;
-}
-
-.collect-btn:active {
-  transform: scale(0.95);
-}
-
-/* Background Rays Effect */
-.rays-container {
-  position: absolute;
-  width: 100%; height: 100%;
-  display: flex; justify-content: center; align-items: center;
-  z-index: 999;
-  pointer-events: none;
+  box-shadow: 0 5px 0 #b35900;
 }
 
 .rays {
-  width: 800px; height: 800px;
-  background: conic-gradient(from 0deg, transparent 0deg 15deg, rgba(255,215,0,0.15) 15deg 30deg, transparent 30deg 45deg, rgba(255,215,0,0.15) 45deg 60deg);
-  border-radius: 50%;
-  animation: rotateRays 10s linear infinite;
+  position: absolute;
+  width: 600px; height: 600px;
+  background: conic-gradient(from 0deg, transparent, rgba(255,215,0,0.2), transparent 30deg);
+  animation: rotateRays 5s linear infinite;
+  z-index: -1;
 }
 
 @keyframes rotateRays { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-@keyframes winPop { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
 
 /* ✨ GLOW FOR GEMS */
 .glow {
-  filter: drop-shadow(0 0 20px gold) brightness(1.3);
+  filter: drop-shadow(0 0 15px gold) brightness(1.2);
   transform: scale(1.1);
   transition: 0.3s;
 }
@@ -291,9 +274,7 @@ body {
 </div>
 
 <div id="winOverlay">
-  <div class="rays-container">
-    <div class="rays"></div>
-  </div>
+  <div class="rays"></div>
   <div class="win-box">
     <h1 class="win-title">BIG WIN!</h1>
     <div class="win-amount" id="winLabel">+0</div>
@@ -312,19 +293,19 @@ spinBtn.addEventListener('click', () => {
 // PREVENT LONG PRESS
 document.body.addEventListener('contextmenu', e => e.preventDefault());
 
-/* 🔹 WIN OVERLAY FUNCTIONS */
+/* 🔹 WIN OVERLAY FUNCTIONS (Call these from script.js) */
 function showWinAnimation(amount) {
   const overlay = document.getElementById("winOverlay");
   const winLabel = document.getElementById("winLabel");
   const coinsEl = document.getElementById("coins");
 
-  winLabel.innerText = "+" + amount.toLocaleString() + " COINS";
+  winLabel.innerText = "+" + amount + " COINS";
   overlay.style.display = "flex";
 
   // Smooth Coin Count-up
   let currentCoins = parseInt(coinsEl.innerText);
   let targetCoins = currentCoins + amount;
-  let step = Math.ceil(amount / 30);
+  let step = Math.ceil(amount / 20);
   
   let counter = setInterval(() => {
     currentCoins += step;
@@ -333,7 +314,7 @@ function showWinAnimation(amount) {
       clearInterval(counter);
     }
     coinsEl.innerText = currentCoins;
-  }, 40);
+  }, 50);
 }
 
 function closeWin() {
