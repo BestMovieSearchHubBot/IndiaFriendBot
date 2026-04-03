@@ -10,31 +10,24 @@
 <style>
 * { 
   box-sizing: border-box; 
-  -webkit-touch-callout: none; 
   -webkit-user-select: none; 
   user-select: none; 
-  -webkit-tap-highlight-color: transparent;
 }
 
 body {
   margin: 0;
-  padding: 0;
   font-family: 'Orbitron', sans-serif;
-  background: url('bg.jpg') no-repeat center center fixed;
-  background-size: cover;
+  background: url('bg.jpg') no-repeat center/cover fixed;
   height: 100vh;
   overflow: hidden;
-  touch-action: none; 
 }
 
 /* TOP BAR */
 .topbar {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   padding: 10px 15px;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(5px);
+  background: rgba(255,255,255,0.2);
   color: white;
 }
 
@@ -42,87 +35,112 @@ body {
   background: #111;
   padding: 5px 15px;
   border-radius: 20px;
-  border: 1px solid #ffd700;
+  border: 1px solid gold;
 }
 
-/* MACHINE CONTAINER */
+/* MACHINE */
 .machine-container {
   display: flex;
   justify-content: center;
-  align-items: center;
-  margin-top: 220px; 
-  position: relative;
+  margin-top: 200px;
 }
 
 .machine {
   position: relative;
-  width: 350px; 
-  height: 350px; 
+  width: 350px;
+  height: 350px;
 }
 
-/* FRAME */
 .frame {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
-  height: 100%;
+  position: absolute;
   z-index: 3;
-  pointer-events: none; 
-  transform: scale(1.25); 
-  transform-origin: center;
 }
 
-/* 🎰 REELS AREA */
+/* 🎰 WIN FRAME */
+.win-frame{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%) scale(0.7);
+  width:260px;
+  padding:18px;
+  border-radius:18px;
+  background:linear-gradient(145deg,#3b2a00,#ffd700,#3b2a00);
+  z-index:5;
+  opacity:0;
+  transition:0.3s;
+}
+
+.win-frame.show{
+  opacity:1;
+  transform:translate(-50%,-50%) scale(1);
+}
+
+.win-inner{
+  background:#111;
+  padding:15px;
+  border-radius:12px;
+  text-align:center;
+}
+
+.win-text{
+  color:#ffd700;
+  font-size:20px;
+}
+
+.win-coins{
+  font-size:26px;
+  color:#00ffcc;
+  margin-top:8px;
+}
+
+/* 🎯 WIN EFFECTS */
+.normal-win{
+  box-shadow:0 0 15px gold;
+}
+
+.big-win{
+  animation:bigWinAnim 0.6s infinite alternate;
+}
+
+@keyframes bigWinAnim{
+  0%{ transform:translate(-50%,-50%) scale(1); box-shadow:0 0 10px gold;}
+  100%{ transform:translate(-50%,-50%) scale(1.12); box-shadow:0 0 40px gold;}
+}
+
+/* REELS */
 .reels {
   position: absolute;
-  top: 28px;    
-  left: -8px;  
-  width: 365px; 
-  height: 350px; 
+  top: 30px;
+  width: 100%;
   display: flex;
-  justify-content: center; 
-  gap: 10px;    
-  overflow: hidden; 
+  justify-content: center;
+  gap: 10px;
+  overflow: hidden;
   z-index: 2;
 }
 
 .reel {
+  width: 85px;
   display: flex;
   flex-direction: column;
-  width: 85px;  
   align-items: center;
 }
 
 .reel img {
-  width: 85px;  
-  height: 85px; 
-  object-fit: contain;
-  margin-bottom: 18px; 
-  transition: transform 0.3s, filter 0.3s;
+  width: 85px;
+  height: 85px;
+  margin-bottom: 18px;
+  transition: 0.3s;
 }
 
-/* SIDEBAR */
-.sidebar {
-  position: absolute;
-  right: 5px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  z-index: 4;
+/* ✨ GLOW */
+@keyframes winGlow {
+  50% { transform: scale(1.2); filter: drop-shadow(0 0 15px gold); }
 }
-
-.sidebtn {
-  background: linear-gradient(180deg, #9c27b0, #4a148c);
-  padding: 12px 8px;
-  border-radius: 8px;
-  color: white;
-  text-align: center;
-  font-size: 12px;
-  border: 1px solid #ffffff50;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+.win {
+  animation: winGlow 0.8s 3;
 }
 
 /* CONTROLS */
@@ -130,61 +148,24 @@ body {
   position: fixed;
   bottom: 0;
   width: 100%;
-  background: rgba(0, 0, 0, 0.85);
+  background: black;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 15px 25px;
+  padding: 15px;
   color: white;
-  border-top: 2px solid #444;
-}
-
-.bet-control {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  font-size: 18px;
 }
 
 .spin {
-  background: linear-gradient(180deg, #ffb300, #fb8c00);
-  padding: 12px 40px;
+  background: orange;
+  padding: 10px 30px;
   border-radius: 30px;
-  font-size: 20px;
-  font-weight: bold;
-  color: #000;
   cursor: pointer;
-  box-shadow: 0 4px 0 #b35900;
-  transition: 0.1s;
-}
-
-.spin:active {
-  transform: scale(0.95);
-}
-
-/* 🔒 Long press / touch hold popup disable */
-img, .sidebtn, .spin, .reel {
-  -webkit-touch-callout: none;  
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  pointer-events: auto; 
-}
-
-/* ✨ WIN GLOW ANIMATION */
-@keyframes winGlow {
-  0% { transform: scale(1); filter: drop-shadow(0 0 0px gold); }
-  50% { transform: scale(1.2); filter: drop-shadow(0 0 15px gold); }
-  100% { transform: scale(1); filter: drop-shadow(0 0 0px gold); }
-}
-
-.win {
-  animation: winGlow 0.8s ease-in-out 3;
 }
 </style>
 </head>
-<body oncontextmenu="return false;"> 
+
+<body>
+
 <div class="topbar">
   <div>👤 Player</div>
   <div class="coins">💰 <span id="coins">1030</span></div>
@@ -192,70 +173,176 @@ img, .sidebtn, .spin, .reel {
 
 <div class="machine-container">
   <div class="machine">
+
     <img src="frame.png" class="frame">
+
+    <!-- 🎰 WIN FRAME -->
+    <div id="winFrame" class="win-frame">
+      <div class="win-inner">
+        <div id="winText" class="win-text">YOU WIN</div>
+        <div id="winCoins" class="win-coins">+0</div>
+      </div>
+    </div>
+
     <div class="reels">
       <div class="reel" id="r1"></div>
       <div class="reel" id="r2"></div>
       <div class="reel" id="r3"></div>
     </div>
-  </div>
 
-  <div class="sidebar">
-    <div class="sidebtn">🎁 Bonus</div>
-    <div class="sidebtn">500x</div>
-    <div class="sidebtn">100x</div>
   </div>
 </div>
 
 <div class="controls">
-  <div class="bet-control">
-    <span>-</span>
-    <span>BET 1</span>
-    <span>+</span>
-  </div>
+  <div>BET 1</div>
   <div class="spin" id="spinBtn">SPIN</div>
 </div>
 
-<script src="script.js"></script>
 <script>
-const spinBtn = document.getElementById('spinBtn');
+const gems = [
+  "gems/red.png",
+  "gems/blue.png",
+  "gems/green.png",
+  "gems/yellow.png",
+  "gems/purple.png"
+];
 
-// Normal click pe spin function call kare
-spinBtn.addEventListener('click', () => {
-    if (typeof spin === "function") spin(); // aapke script.js me spin function call hoga
-});
+let coins = 1030;
+let coinsEl = document.getElementById("coins");
 
-// Long press / contextmenu safe without blocking normal click
-spinBtn.addEventListener('touchstart', e => e.stopPropagation(), {passive:true});
-spinBtn.addEventListener('mousedown', e => e.stopPropagation());
+let isSpinning = false;
+let finishedReels = 0;
 
-// Prevent general long press / right click
-document.body.addEventListener('contextmenu', e => e.preventDefault());
-document.body.addEventListener('touchstart', e => {
-    const t = e.target;
-    if (!t.classList.contains('spin') && !t.classList.contains('sidebtn') && t.tagName !== 'IMG') {
-        return; 
-    }
-    e.preventDefault();
-}, {passive:false});
+/* CREATE REEL */
+function createReel(id){
+  let reel = document.getElementById(id);
+  reel.innerHTML = "";
 
-/* 🔹 WIN GLOW JS HELPER */
-function handleWin(winPositions) {
-  // winPositions = [{reel:'r1', index:1}, ...]
-  winPositions.forEach(pos => {
-    const reel = document.getElementById(pos.reel);
-    const gem = reel.children[pos.index];
-    if(gem) {
-      gem.classList.add('win');
-      gem.addEventListener('animationend', () => {
-        gem.classList.remove('win');
-      });
-    }
-  });
+  for(let i=0;i<15;i++){
+    let img = document.createElement("img");
+    img.src = gems[Math.floor(Math.random()*gems.length)];
+    reel.appendChild(img);
+  }
 }
 
-// Example usage: middle gems glow
-// handleWin([{reel:'r1', index:1}, {reel:'r2', index:1}, {reel:'r3', index:1}]);
+/* INIT */
+createReel("r1");
+createReel("r2");
+createReel("r3");
+
+/* SPIN BUTTON */
+document.getElementById("spinBtn").onclick = spin;
+
+/* SPIN */
+function spin(){
+  if(isSpinning) return;
+
+  isSpinning = true;
+  finishedReels = 0;
+
+  spinReel("r1",0);
+  spinReel("r2",200);
+  spinReel("r3",400);
+}
+
+/* SPIN ANIMATION */
+function spinReel(id, delay){
+  let reel = document.getElementById(id);
+  let height = 103 * reel.children.length;
+
+  let start=null;
+  let duration=2500+delay;
+
+  function ease(t){ return 1-Math.pow(1-t,3); }
+
+  function anim(ts){
+    if(!start) start=ts;
+    let p=ts-start;
+    let t=Math.min(p/duration,1);
+    let move=ease(t)*(height*3);
+
+    reel.style.transform=`translateY(${-move%height}px)`;
+
+    if(p<duration){
+      requestAnimationFrame(anim);
+    } else {
+      reel.style.transform="translateY(0)";
+      createReel(id);
+
+      finishedReels++;
+      if(finishedReels===3){
+        setTimeout(()=>{
+          checkWin();
+          isSpinning=false;
+        },200);
+      }
+    }
+  }
+
+  setTimeout(()=>requestAnimationFrame(anim),delay);
+}
+
+/* WIN FRAME */
+function showWinFrame(amount){
+  let frame=document.getElementById("winFrame");
+  let text=document.getElementById("winText");
+  let coin=document.getElementById("winCoins");
+
+  coin.textContent="+"+amount;
+
+  frame.classList.remove("normal-win","big-win");
+
+  if(amount>=50){
+    text.textContent="BIG WIN 🔥";
+    frame.classList.add("big-win");
+  } else {
+    text.textContent="YOU WIN";
+    frame.classList.add("normal-win");
+  }
+
+  frame.classList.add("show");
+
+  setTimeout(()=>{
+    frame.classList.remove("show","normal-win","big-win");
+  },2000);
+}
+
+/* CHECK WIN */
+function checkWin(){
+  let r1=document.getElementById("r1");
+  let r2=document.getElementById("r2");
+  let r3=document.getElementById("r3");
+
+  let win=0;
+  let pos=[];
+
+  for(let i=0;i<3;i++){
+    let a=r1.children[i];
+    let b=r2.children[i];
+    let c=r3.children[i];
+
+    if(a.src===b.src && b.src===c.src){
+      win+=50;
+      pos.push({reel:'r1',index:i},{reel:'r2',index:i},{reel:'r3',index:i});
+    }
+    else if(a.src===b.src || b.src===c.src || a.src===c.src){
+      win+=10;
+    }
+  }
+
+  if(win>0){
+    coins+=win;
+    coinsEl.textContent=coins;
+
+    showWinFrame(win);
+
+    pos.forEach(p=>{
+      let gem=document.getElementById(p.reel).children[p.index];
+      gem.classList.add("win");
+      setTimeout(()=>gem.classList.remove("win"),1000);
+    });
+  }
+}
 </script>
 
 </body>
