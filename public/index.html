@@ -136,22 +136,43 @@ body {
   z-index: 10;
 }
 
-/* BET BAR */
 .bet-bar {
-  position: relative;
-  width: 60%;
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  width: 70%;   /* 👈 isko 80% bhi kar sakte ho */
+  height: auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/* Image ko bada karo */
 .bet-bar img {
   width: 100%;
+  height: auto;
+  transform: scale(1.2); /* 👈 isse size bada dikhega */
 }
 
-/* clickable areas */
-.bet-minus, .bet-plus, .bet-text {
+/* CLICK AREA bhi scale ke hisaab se */
+.bet-minus, .bet-plus {
   position: absolute;
+  top: 0;
+  width: 25%;
+  height: 100%;
+  cursor: pointer;
+}
+
+/* TEXT size bhi bada karo */
+.bet-text {
+  position: absolute;
+  width: 100%;
+  text-align: center;
   top: 50%;
   transform: translateY(-50%);
   color: white;
+  font-size: 22px; /* 👈 bada */
   font-weight: bold;
 }
 
