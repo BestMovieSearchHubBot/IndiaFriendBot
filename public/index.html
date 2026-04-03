@@ -127,33 +127,51 @@ body {
 
 .controls {
   position: fixed;
-  bottom: 60px;
+  bottom: 50px;
   width: 100%;
-  padding: 15px 25px;
-
   display: flex;
   justify-content: space-between;
   align-items: center;
-
-  /* 👇 Wood color gradient */
-  background: linear-gradient(
-    to top,
-    #3e1f0d,
-    #5a2e12,
-    #7a3f16,
-    #a05a1f
-  );
-
-  /* 👇 texture feel */
-  box-shadow: 
-    inset 0 3px 8px rgba(255, 215, 0, 0.3),
-    inset 0 -3px 8px rgba(0, 0, 0, 0.6),
-    0 -5px 15px rgba(0,0,0,0.8);
-
-  border-top: 2px solid #d4af37; /* gold line */
-
-  color: #fff;
+  padding: 10px 20px;
   z-index: 10;
+}
+
+/* BET BAR */
+.bet-bar {
+  position: relative;
+  width: 60%;
+}
+
+.bet-bar img {
+  width: 100%;
+}
+
+/* clickable areas */
+.bet-minus, .bet-plus, .bet-text {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: white;
+  font-weight: bold;
+}
+
+.bet-minus { left: 10%; }
+.bet-text { left: 35%; }
+.bet-plus { right: 10%; }
+
+/* SPIN BUTTON */
+.spin-btn {
+  width: 35%;
+}
+
+.spin-btn img {
+  width: 100%;
+  cursor: pointer;
+  transition: 0.1s;
+}
+
+.spin-btn:active img {
+  transform: scale(0.95);
 }
 
 .bet-control {
@@ -225,12 +243,22 @@ img, .sidebtn, .spin, .reel {
 </div>
 
 <div class="controls">
-  <div class="bet-control">
-    <span>-</span>
-    <span>BET 1</span>
-    <span>+</span>
+
+  <!-- BET BAR IMAGE -->
+  <div class="bet-bar">
+    <img src="bet-bar.png" alt="bet">
+    
+    <!-- clickable areas -->
+    <div class="bet-minus">-</div>
+    <div class="bet-text">BET 1</div>
+    <div class="bet-plus">+</div>
   </div>
-  <div class="spin" id="spinBtn">SPIN</div>
+
+  <!-- SPIN BUTTON IMAGE -->
+  <div class="spin-btn" id="spinBtn">
+    <img src="spin-btn.png" alt="spin">
+  </div>
+
 </div>
 
 <script src="script.js"></script>
