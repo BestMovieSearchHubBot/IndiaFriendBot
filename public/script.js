@@ -103,7 +103,8 @@ function spinReel(id, delay){
   }, delay);
 }
 
-// check win
+// ... (Purana variable aur createReel same rahega) ...
+
 function checkWin(){
   let reels = [
     document.getElementById("r1"),
@@ -119,32 +120,59 @@ function checkWin(){
     let b = reels[1].children[row];
     let c = reels[2].children[row];
 
-    if(a.src===b.src && b.src===c.src){
+    // Win Logic
+    if(a.src === b.src && b.src === c.src){
       totalWin += 50;
-      glowTargets.push(a,b,c);
+      glowTargets.push(a, b, c);
     } 
-    else if(a.src===b.src || b.src===c.src || a.src===c.src){
+    else if(a.src === b.src || b.src === c.src || a.src === c.src){
       totalWin += 10;
-
-      if(a.src===b.src) glowTargets.push(a,b);
-      if(b.src===c.src) glowTargets.push(b,c);
-      if(a.src===c.src) glowTargets.push(a,c);
+      if(a.src === b.src) glowTargets.push(a, b);
+      if(b.src === c.src) glowTargets.push(b, c);
+      if(a.src === c.src) glowTargets.push(a, c);
     }
   }
 
-  if(totalWin>0){
-    coins += totalWin;
-    coinsEl.textContent = coins;
-
+  if(totalWin > 0){
+    // Highlight winning gems
     glowTargets.forEach(img => img.classList.add("glow"));
 
-    setTimeout(()=>{
-      glowTargets.forEach(img => img.classList.remove("glow"));
-    }, 1500);
-
-    // ✅ result properly after stop
-    setTimeout(()=>{
-      alert("You won " + totalWin + " coins!");
-    }, 100);
+    // Delay ke baad overlay dikhao
+    setTimeout(() => {
+      showWinAnimation(totalWin);
+    }, 500);
   }
+}
+
+// ✨ NAYA: Casino Animation Function
+function showWinAnimation(amount) {
+  const overlay = document.getElementById("winOverlay");
+  const winLabel = document.getElementById("winLabel");
+  
+  winLabel.innerText = "+" + amount + " COINS";
+  overlay.style.display = "flex";
+  
+  // Coin count-up effect (Visual update)
+  let startValue = coins;
+  coins += amount;
+  let duration = 1000; 
+  let startTime = null;
+
+  function updateCoins(timestamp) {
+    if (!startTime) startTime = timestamp;
+    let progress = timestamp - startTime;
+    let current = Math.min(Math.floor(startValue + (amount * (progress / duration))), coins);
+    coinsEl.textContent = current;
+    if (progress < duration) requestAnimationFrame(updateCoins);
+  }
+  requestAnimationFrame(updateCoins);
+}
+
+// Collect button click function
+function closeWin() {
+  const overlay = document.getElementById("winOverlay");
+  overlay.style.display = "none";
+  
+  // Clean up glow classes
+  document.querySelectorAll('.glow').forEach(el => el.classList.remove('glow'));
 }
