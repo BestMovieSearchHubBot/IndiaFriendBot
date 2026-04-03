@@ -7,12 +7,12 @@ const gems = [
 ];
 
 let coinsEl = document.getElementById("coins");
-let coins = 1000;
+let coins = 1000; // Starting coins
 
-let isSpinning = false;   // ✅ NEW (lock system)
-let finishedReels = 0;    // ✅ track reels finish
+let isSpinning = false;
+let finishedReels = 0;
 
-// create reel
+// Reel create karne ka function
 function createReel(id){
   let reel = document.getElementById(id);
   reel.innerHTML = "";
@@ -22,9 +22,10 @@ function createReel(id){
 
   let reelImages = [];
 
+  // 15 gems generate karein taaki spin smooth dikhe
   while(reelImages.length < 15){
     let gem = gems[Math.floor(Math.random() * gems.length)];
-    if(gemCount[gem] < 3){
+    if(gemCount[gem] < 5){ // thoda balance badha diya
       reelImages.push(gem);
       gemCount[gem]++;
     }
@@ -39,27 +40,28 @@ function createReel(id){
   });
 }
 
-// init
+// Initial Reels
 createReel("r1");
 createReel("r2");
 createReel("r3");
 
-// spin
+// Spin Trigger
 function spin(){
-  if(isSpinning) return; // ❌ block multiple clicks
+  if(isSpinning) return; 
 
   isSpinning = true;
   finishedReels = 0;
 
+  // Har reel ka delay badha diya taaki casino feel aaye
   spinReel("r1", 0);
-  spinReel("r2", 200);
-  spinReel("r3", 400);
+  spinReel("r2", 300);
+  spinReel("r3", 600);
 }
 
-// smooth spin
+// Animation Logic
 function spinReel(id, delay){
   const reel = document.getElementById(id);
-  const imgHeight = 69;
+  const imgHeight = 85 + 18; // FIX: 85px (image) + 18px (margin-bottom)
   const totalHeight = imgHeight * reel.children.length;
 
   let start = null;
@@ -76,24 +78,21 @@ function spinReel(id, delay){
     let t = Math.min(progress / duration, 1);
     let eased = easeOut(t);
 
-    let move = eased * (totalHeight * 3);
+    let move = eased * (totalHeight * 4); // 4 baar poori reel ghumegi
     reel.style.transform = `translateY(${-move % totalHeight}px)`;
 
     if(progress < duration){
       requestAnimationFrame(animate);
     } else {
-      // ✅ force clean stop (no stuck issue)
       reel.style.transform = "translateY(0)";
-      createReel(id);
-
+      createReel(id); // Spin khatam hone par nayi symbols reload
       finishedReels++;
 
-      // ✅ only after ALL reels stop
       if(finishedReels === 3){
         setTimeout(()=>{
           checkWin();
-          isSpinning = false; // unlock spin
-        }, 200);
+          isSpinning = false;
+        }, 300);
       }
     }
   }
@@ -103,8 +102,7 @@ function spinReel(id, delay){
   }, delay);
 }
 
-// ... (Purana variable aur createReel same rahega) ...
-
+// Winning Logic
 function checkWin(){
   let reels = [
     document.getElementById("r1"),
@@ -115,16 +113,20 @@ function checkWin(){
   let totalWin = 0;
   let glowTargets = [];
 
+  // Pehli 3 row check karein (kyunki overflow:hidden hai)
   for(let row=0; row<3; row++){
     let a = reels[0].children[row];
     let b = reels[1].children[row];
     let c = reels[2].children[row];
 
-    // Win Logic
+    if(!a || !b || !c) continue;
+
+    // Perfect Match (50 Coins)
     if(a.src === b.src && b.src === c.src){
       totalWin += 50;
       glowTargets.push(a, b, c);
     } 
+    // Partial Match (10 Coins)
     else if(a.src === b.src || b.src === c.src || a.src === c.src){
       totalWin += 10;
       if(a.src === b.src) glowTargets.push(a, b);
@@ -134,17 +136,17 @@ function checkWin(){
   }
 
   if(totalWin > 0){
-    // Highlight winning gems
+    // CSS glow apply karein
     glowTargets.forEach(img => img.classList.add("glow"));
 
-    // Delay ke baad overlay dikhao
+    // Casino Overlay dikhayein
     setTimeout(() => {
       showWinAnimation(totalWin);
-    }, 500);
+    }, 400);
   }
 }
 
-// ✨ NAYA: Casino Animation Function
+// Overlay function (Jo aapke HTML ke naye UI ko trigger karega)
 function showWinAnimation(amount) {
   const overlay = document.getElementById("winOverlay");
   const winLabel = document.getElementById("winLabel");
@@ -152,10 +154,10 @@ function showWinAnimation(amount) {
   winLabel.innerText = "+" + amount + " COINS";
   overlay.style.display = "flex";
   
-  // Coin count-up effect (Visual update)
+  // Coin count-up effect
   let startValue = coins;
   coins += amount;
-  let duration = 1000; 
+  let duration = 800; 
   let startTime = null;
 
   function updateCoins(timestamp) {
@@ -168,11 +170,8 @@ function showWinAnimation(amount) {
   requestAnimationFrame(updateCoins);
 }
 
-// Collect button click function
+// Button click par band karne ke liye
 function closeWin() {
-  const overlay = document.getElementById("winOverlay");
-  overlay.style.display = "none";
-  
-  // Clean up glow classes
+  document.getElementById("winOverlay").style.display = "none";
   document.querySelectorAll('.glow').forEach(el => el.classList.remove('glow'));
 }
