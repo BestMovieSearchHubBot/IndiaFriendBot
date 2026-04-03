@@ -9,7 +9,10 @@ const gems = [
 let coinsEl = document.getElementById("coins");
 let coins = 1000;
 
-// create reel with 15 images, max 3 of each gem
+let isSpinning = false;   // ✅ NEW (lock system)
+let finishedReels = 0;    // ✅ track reels finish
+
+// create reel
 function createReel(id){
   let reel = document.getElementById(id);
   reel.innerHTML = "";
@@ -27,10 +30,8 @@ function createReel(id){
     }
   }
 
-  // shuffle
   reelImages.sort(() => Math.random() - 0.5);
 
-  // add to reel
   reelImages.forEach(src => {
     let img = document.createElement("img");
     img.src = src;
@@ -43,14 +44,19 @@ createReel("r1");
 createReel("r2");
 createReel("r3");
 
-// spin reels
+// spin
 function spin(){
+  if(isSpinning) return; // ❌ block multiple clicks
+
+  isSpinning = true;
+  finishedReels = 0;
+
   spinReel("r1", 0);
   spinReel("r2", 200);
   spinReel("r3", 400);
 }
 
-// 🎰 SMOOTH CASINO SPIN (UPDATED)
+// smooth spin
 function spinReel(id, delay){
   const reel = document.getElementById(id);
   const imgHeight = 69;
@@ -60,7 +66,7 @@ function spinReel(id, delay){
   let duration = 2500 + delay;
 
   function easeOut(t){
-    return 1 - Math.pow(1 - t, 3); // smooth slow down
+    return 1 - Math.pow(1 - t, 3);
   }
 
   function animate(timestamp){
@@ -70,18 +76,25 @@ function spinReel(id, delay){
     let t = Math.min(progress / duration, 1);
     let eased = easeOut(t);
 
-    // 3 full spins + slow stop
     let move = eased * (totalHeight * 3);
     reel.style.transform = `translateY(${-move % totalHeight}px)`;
 
     if(progress < duration){
       requestAnimationFrame(animate);
     } else {
-      // stop clean
+      // ✅ force clean stop (no stuck issue)
       reel.style.transform = "translateY(0)";
       createReel(id);
 
-      if(id === "r3") checkWin();
+      finishedReels++;
+
+      // ✅ only after ALL reels stop
+      if(finishedReels === 3){
+        setTimeout(()=>{
+          checkWin();
+          isSpinning = false; // unlock spin
+        }, 200);
+      }
     }
   }
 
@@ -90,16 +103,13 @@ function spinReel(id, delay){
   }, delay);
 }
 
-// check for adjacent matches
+// check win
 function checkWin(){
-  let reels = [document.getElementById("r1"), document.getElementById("r2"), document.getElementById("r3")];
-  let visibleGems = [];
-
-  reels.forEach(r => {
-    visibleGems.push(r.children[0].src);
-    visibleGems.push(r.children[1].src);
-    visibleGems.push(r.children[2].src);
-  });
+  let reels = [
+    document.getElementById("r1"),
+    document.getElementById("r2"),
+    document.getElementById("r3")
+  ];
 
   let totalWin = 0;
   let glowTargets = [];
@@ -112,7 +122,8 @@ function checkWin(){
     if(a.src===b.src && b.src===c.src){
       totalWin += 50;
       glowTargets.push(a,b,c);
-    } else if(a.src===b.src || b.src===c.src || a.src===c.src){
+    } 
+    else if(a.src===b.src || b.src===c.src || a.src===c.src){
       totalWin += 10;
 
       if(a.src===b.src) glowTargets.push(a,b);
@@ -131,8 +142,9 @@ function checkWin(){
       glowTargets.forEach(img => img.classList.remove("glow"));
     }, 1500);
 
-    alert("You won "+totalWin+" coins!");
-  } else {
-    console.log("No win this spin");
+    // ✅ result properly after stop
+    setTimeout(()=>{
+      alert("You won " + totalWin + " coins!");
+    }, 100);
   }
 }
