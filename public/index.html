@@ -132,30 +132,23 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 20px;
+  padding: 10px 15px; /* 👈 thoda tight for better fit */
   z-index: 10;
 }
 
+/* BET BAR */
 .bet-bar {
-  position: absolute;
-  bottom: 20px;
-  left: 0;
-  width: 70%;   /* 👈 isko 80% bhi kar sakte ho */
-  height: auto;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative;
+  width: 70%;          /* 👈 60% → 70% (bada kiya) */
+  max-width: 520px;    /* 👈 control for big screens */
 }
 
-/* Image ko bada karo */
 .bet-bar img {
   width: 100%;
-  height: auto;
-  transform: scale(1.2); /* 👈 isse size bada dikhega */
+  transform: scale(1.15); /* 👈 main trick (size bada dikhega) */
 }
 
-/* CLICK AREA bhi scale ke hisaab se */
+/* clickable areas */
 .bet-minus, .bet-plus {
   position: absolute;
   top: 0;
@@ -164,25 +157,33 @@ body {
   cursor: pointer;
 }
 
-/* TEXT size bhi bada karo */
+/* LEFT (-) */
+.bet-minus {
+  left: 0;
+}
+
+/* RIGHT (+) */
+.bet-plus {
+  right: 0;
+}
+
+/* TEXT CENTER */
 .bet-text {
   position: absolute;
   width: 100%;
-  text-align: center;
   top: 50%;
   transform: translateY(-50%);
+  text-align: center;
   color: white;
-  font-size: 22px; /* 👈 bada */
   font-weight: bold;
+  font-size: 22px;   /* 👈 bada aur clear */
+  pointer-events: none;
 }
-
-.bet-minus { left: 10%; }
-.bet-text { left: 35%; }
-.bet-plus { right: 10%; }
 
 /* SPIN BUTTON */
 .spin-btn {
-  width: 35%;
+  width: 28%;   /* 👈 35% → 28% (balance ke liye) */
+  max-width: 180px;
 }
 
 .spin-btn img {
