@@ -125,10 +125,9 @@ body {
   box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
 
-/* CONTROLS */
 .controls {
   position: fixed;
-  bottom: 0;
+  bottom: 60px; /* 👈 yeh value adjust kar sakte ho (50–80px) */
   width: 100%;
   background: rgba(0, 0, 0, 0.85);
   display: flex;
@@ -137,6 +136,7 @@ body {
   padding: 15px 25px;
   color: white;
   border-top: 2px solid #444;
+  z-index: 10; /* 👈 ensure karega frame ke upar aaye */
 }
 
 .bet-control {
