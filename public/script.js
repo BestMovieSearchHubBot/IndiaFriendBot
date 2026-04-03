@@ -6,13 +6,13 @@ const gems = [
   "gems/purple.png"
 ];
 
+let coins = 1030;
 let coinsEl = document.getElementById("coins");
-let coins = 1000;
 
-let isSpinning = false;   // ✅ NEW (lock system)
-let finishedReels = 0;    // ✅ track reels finish
+let isSpinning = false;
+let finishedReels = 0;
 
-// create reel
+/* 🎰 CREATE REEL */
 function createReel(id){
   let reel = document.getElementById(id);
   reel.innerHTML = "";
@@ -24,12 +24,14 @@ function createReel(id){
 
   while(reelImages.length < 15){
     let gem = gems[Math.floor(Math.random() * gems.length)];
+
     if(gemCount[gem] < 3){
       reelImages.push(gem);
       gemCount[gem]++;
     }
   }
 
+  // shuffle
   reelImages.sort(() => Math.random() - 0.5);
 
   reelImages.forEach(src => {
@@ -39,14 +41,17 @@ function createReel(id){
   });
 }
 
-// init
+/* 🔹 INIT */
 createReel("r1");
 createReel("r2");
 createReel("r3");
 
-// spin
+/* 🎯 SPIN BUTTON */
+document.getElementById("spinBtn").addEventListener("click", spin);
+
+/* 🎰 SPIN */
 function spin(){
-  if(isSpinning) return; // ❌ block multiple clicks
+  if(isSpinning) return;
 
   isSpinning = true;
   finishedReels = 0;
@@ -56,10 +61,10 @@ function spin(){
   spinReel("r3", 400);
 }
 
-// smooth spin
+/* 🎡 SPIN ANIMATION (SMOOTH) */
 function spinReel(id, delay){
   const reel = document.getElementById(id);
-  const imgHeight = 69;
+  const imgHeight = 103;
   const totalHeight = imgHeight * reel.children.length;
 
   let start = null;
@@ -71,8 +76,8 @@ function spinReel(id, delay){
 
   function animate(timestamp){
     if(!start) start = timestamp;
-    let progress = timestamp - start;
 
+    let progress = timestamp - start;
     let t = Math.min(progress / duration, 1);
     let eased = easeOut(t);
 
@@ -82,17 +87,15 @@ function spinReel(id, delay){
     if(progress < duration){
       requestAnimationFrame(animate);
     } else {
-      // ✅ force clean stop (no stuck issue)
       reel.style.transform = "translateY(0)";
       createReel(id);
 
       finishedReels++;
 
-      // ✅ only after ALL reels stop
       if(finishedReels === 3){
         setTimeout(()=>{
           checkWin();
-          isSpinning = false; // unlock spin
+          isSpinning = false;
         }, 200);
       }
     }
@@ -103,7 +106,32 @@ function spinReel(id, delay){
   }, delay);
 }
 
-// check win
+/* 🎉 SHOW WIN FRAME */
+function showWinFrame(amount){
+  const frame = document.getElementById("winFrame");
+  const text = document.getElementById("winText");
+  const coinsTxt = document.getElementById("winCoins");
+
+  coinsTxt.textContent = "+" + amount;
+
+  frame.classList.remove("normal-win","big-win");
+
+  if(amount >= 50){
+    text.textContent = "BIG WIN 🔥";
+    frame.classList.add("big-win");
+  } else {
+    text.textContent = "YOU WIN";
+    frame.classList.add("normal-win");
+  }
+
+  frame.classList.add("show");
+
+  setTimeout(()=>{
+    frame.classList.remove("show","normal-win","big-win");
+  }, 2000);
+}
+
+/* 💰 CHECK WIN */
 function checkWin(){
   let reels = [
     document.getElementById("r1"),
@@ -112,39 +140,48 @@ function checkWin(){
   ];
 
   let totalWin = 0;
-  let glowTargets = [];
+  let winPositions = [];
 
-  for(let row=0; row<3; row++){
+  for(let row = 0; row < 3; row++){
     let a = reels[0].children[row];
     let b = reels[1].children[row];
     let c = reels[2].children[row];
 
-    if(a.src===b.src && b.src===c.src){
+    // 🟢 FULL MATCH
+    if(a.src === b.src && b.src === c.src){
       totalWin += 50;
-      glowTargets.push(a,b,c);
-    } 
-    else if(a.src===b.src || b.src===c.src || a.src===c.src){
-      totalWin += 10;
 
-      if(a.src===b.src) glowTargets.push(a,b);
-      if(b.src===c.src) glowTargets.push(b,c);
-      if(a.src===c.src) glowTargets.push(a,c);
+      winPositions.push(
+        {reel:'r1', index:row},
+        {reel:'r2', index:row},
+        {reel:'r3', index:row}
+      );
+    } 
+    // 🟡 PARTIAL MATCH
+    else if(a.src === b.src || b.src === c.src || a.src === c.src){
+      totalWin += 10;
     }
   }
 
-  if(totalWin>0){
+  if(totalWin > 0){
     coins += totalWin;
     coinsEl.textContent = coins;
 
-    glowTargets.forEach(img => img.classList.add("glow"));
+    // 🎉 Show UI
+    showWinFrame(totalWin);
 
-    setTimeout(()=>{
-      glowTargets.forEach(img => img.classList.remove("glow"));
-    }, 1500);
+    // ✨ Glow effect
+    winPositions.forEach(pos => {
+      const reel = document.getElementById(pos.reel);
+      const gem = reel.children[pos.index];
 
-    // ✅ result properly after stop
-    setTimeout(()=>{
-      alert("You won " + totalWin + " coins!");
-    }, 100);
+      if(gem){
+        gem.classList.add("win");
+
+        setTimeout(()=>{
+          gem.classList.remove("win");
+        }, 1000);
+      }
+    });
   }
 }
