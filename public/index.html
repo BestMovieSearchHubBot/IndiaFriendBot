@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Lucky Gems Slot</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;900&display=swap" rel="stylesheet">
 
 <style>
@@ -35,6 +36,8 @@ body {
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(5px);
   color: white;
+  position: relative;
+  z-index: 10;
 }
 
 .coins {
@@ -59,7 +62,6 @@ body {
   height: 350px; 
 }
 
-/* FRAME */
 .frame {
   position: absolute;
   top: 0;
@@ -72,7 +74,6 @@ body {
   transform-origin: center;
 }
 
-/* 🎰 REELS AREA */
 .reels {
   position: absolute;
   top: 28px;    
@@ -98,7 +99,6 @@ body {
   height: 85px; 
   object-fit: contain;
   margin-bottom: 18px; 
-  transition: transform 0.3s, filter 0.3s;
 }
 
 /* SIDEBAR */
@@ -121,7 +121,6 @@ body {
   text-align: center;
   font-size: 12px;
   border: 1px solid #ffffff50;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
 
 .controls {
@@ -129,18 +128,16 @@ body {
   bottom: 50px;
   width: 100%;
   display: flex;
-  justify-content: center;  /* 👈 BET ko center karega */
+  justify-content: center;
   align-items: center;
   padding: 10px 15px;
   z-index: 10;
 }
 
-/* BET BAR (CENTER) */
 .bet-bar {
   position: relative;
   width: 90%;
   max-width: 520px;
-  margin: 0 auto;   /* 👈 extra safety center */
 }
 
 .bet-bar img {
@@ -148,22 +145,8 @@ body {
   transform: scale(1.5);
 }
 
-/* CLICK AREAS */
-.bet-minus, .bet-plus {
-  position: absolute;
-  top: 0;
-  width: 25%;
-  height: 100%;
-  cursor: pointer;
-}
-
-.bet-minus { left: 0; }
-.bet-plus { right: 0; }
-
-/* TEXT */
 .bet-text {
   position: absolute;
-  left: 15px
   width: 100%;
   top: 50%;
   transform: translateY(-50%);
@@ -171,15 +154,12 @@ body {
   color: white;
   font-weight: bold;
   font-size: 20px;
-  pointer-events: none;
 }
 
-/* 🔥 SPIN BUTTON (RIGHT SIDE FIX) */
 .spin-btn {
-  position: absolute;   /* 👈 MAIN FIX */
-  right: 15px;          /* 👈 right side chipka */
-  bottom: 15;
-
+  position: absolute;
+  right: 15px;
+  bottom: 15px;
   width: 28%;
   max-width: 180px;
   z-index: 20;
@@ -188,86 +168,35 @@ body {
 .spin-btn img {
   width: 100%;
   cursor: pointer;
-  transition: 0.1s;
 }
 
-.spin-btn:active img {
-  transform: scale(0.95);
-}
-.bet-control {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  font-size: 18px;
-}
-
-.spin {
-  background: linear-gradient(180deg, #ffb300, #fb8c00);
-  padding: 12px 40px;
-  border-radius: 30px;
-  font-size: 20px;
-  font-weight: bold;
-  color: #000;
-  cursor: pointer;
-  box-shadow: 0 4px 0 #b35900;
-  transition: 0.1s;
-}
-
-.spin:active {
-  transform: scale(0.95);
-}
-
-/* 🔒 Long press / touch hold popup disable */
-img, .sidebtn, .spin, .reel {
-  -webkit-touch-callout: none;  
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  pointer-events: auto; 
-}
-
-/* ✨ WIN GLOW ANIMATION */
-@keyframes winGlow {
-  0% { transform: scale(1); filter: drop-shadow(0 0 0px gold); }
-  50% { transform: scale(1.2); filter: drop-shadow(0 0 15px gold); }
-  100% { transform: scale(1); filter: drop-shadow(0 0 0px gold); }
-}
-
-.win {
-  animation: winGlow 0.8s ease-in-out 3;
-}
-
-/* ✨ NAYA: WIN OVERLAY STYLING */
+/* ✨ NEW: WIN OVERLAY STYLE (CASINO TYPE) */
 #winOverlay {
   display: none; 
   position: fixed; 
   top: 0; left: 0; 
   width: 100%; height: 100%; 
-  background: rgba(0,0,0,0.85); 
+  background: rgba(0,0,0,0.9); 
   z-index: 1000; 
   flex-direction: column; 
   justify-content: center; 
   align-items: center;
-  overflow: hidden;
 }
 
 .win-box {
   position: relative;
   text-align: center;
-  animation: popScale 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .win-title {
-  font-family: 'Orbitron', sans-serif;
   font-weight: 900;
   font-size: 50px;
   background: linear-gradient(to bottom, #fff700, #ff8c00);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 15px rgba(255,140,0,0.8));
+  filter: drop-shadow(0 0 15px gold);
   margin: 0;
-  letter-spacing: 2px;
 }
 
 .win-amount {
@@ -279,17 +208,17 @@ img, .sidebtn, .spin, .reel {
 
 .collect-btn {
   padding: 15px 50px;
-  font-size: 20px;
+  font-size: 18px;
   font-family: 'Orbitron';
-  background: linear-gradient(180deg, #00ff88, #008f4c);
+  background: linear-gradient(180deg, #ffb300, #fb8c00);
   border: none;
   border-radius: 50px;
-  color: white;
+  color: #000;
+  font-weight: bold;
   cursor: pointer;
-  box-shadow: 0 0 20px rgba(0,255,136,0.4);
+  box-shadow: 0 5px 0 #b35900;
 }
 
-/* Rays Rotation Animation */
 .rays {
   position: absolute;
   width: 600px; height: 600px;
@@ -298,17 +227,10 @@ img, .sidebtn, .spin, .reel {
   z-index: -1;
 }
 
-@keyframes rotateRays {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+@keyframes rotateRays { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
 
-@keyframes popScale {
-  0% { transform: scale(0); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-/* Glow Effect for Gems */
+/* ✨ GLOW FOR GEMS */
 .glow {
   filter: drop-shadow(0 0 15px gold) brightness(1.2);
   transform: scale(1.1);
@@ -320,7 +242,35 @@ img, .sidebtn, .spin, .reel {
 
 <div class="topbar">
   <div>👤 Player</div>
-  <div class="coins">💰 <span id="coins">1000</span></div>
+  <div class="coins">💰 <span id="coins">1030</span></div>
+</div>
+
+<div class="machine-container">
+  <div class="machine">
+    <img src="frame.png" class="frame">
+    <div class="reels">
+      <div class="reel" id="r1"></div>
+      <div class="reel" id="r2"></div>
+      <div class="reel" id="r3"></div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebtn">🎁 Bonus</div>
+    <div class="sidebtn">500x</div>
+    <div class="sidebtn">100x</div>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="bet-bar">
+    <img src="bet-bar.png" alt="bet">
+    <div class="bet-text">BET 1</div>
+  </div>
+
+  <div class="spin-btn" id="spinBtn">
+    <img src="spin-btn.png" alt="spin">
+  </div>
 </div>
 
 <div id="winOverlay">
@@ -333,5 +283,45 @@ img, .sidebtn, .spin, .reel {
 </div>
 
 <script src="script.js"></script>
+<script>
+// SPIN BUTTON LOGIC
+const spinBtn = document.getElementById('spinBtn');
+spinBtn.addEventListener('click', () => {
+    if (typeof spin === "function") spin(); 
+});
+
+// PREVENT LONG PRESS
+document.body.addEventListener('contextmenu', e => e.preventDefault());
+
+/* 🔹 WIN OVERLAY FUNCTIONS (Call these from script.js) */
+function showWinAnimation(amount) {
+  const overlay = document.getElementById("winOverlay");
+  const winLabel = document.getElementById("winLabel");
+  const coinsEl = document.getElementById("coins");
+
+  winLabel.innerText = "+" + amount + " COINS";
+  overlay.style.display = "flex";
+
+  // Smooth Coin Count-up
+  let currentCoins = parseInt(coinsEl.innerText);
+  let targetCoins = currentCoins + amount;
+  let step = Math.ceil(amount / 20);
+  
+  let counter = setInterval(() => {
+    currentCoins += step;
+    if (currentCoins >= targetCoins) {
+      currentCoins = targetCoins;
+      clearInterval(counter);
+    }
+    coinsEl.innerText = currentCoins;
+  }, 50);
+}
+
+function closeWin() {
+  document.getElementById("winOverlay").style.display = "none";
+  document.querySelectorAll('.glow').forEach(el => el.classList.remove('glow'));
+}
+</script>
+
 </body>
 </html>
