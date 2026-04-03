@@ -4,8 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Lucky Gems Slot</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;900&display=swap" rel="stylesheet">
 
 <style>
 * { 
@@ -238,91 +237,101 @@ img, .sidebtn, .spin, .reel {
 .win {
   animation: winGlow 0.8s ease-in-out 3;
 }
+
+/* ✨ NAYA: WIN OVERLAY STYLING */
+#winOverlay {
+  display: none; 
+  position: fixed; 
+  top: 0; left: 0; 
+  width: 100%; height: 100%; 
+  background: rgba(0,0,0,0.85); 
+  z-index: 1000; 
+  flex-direction: column; 
+  justify-content: center; 
+  align-items: center;
+  overflow: hidden;
+}
+
+.win-box {
+  position: relative;
+  text-align: center;
+  animation: popScale 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.win-title {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
+  font-size: 50px;
+  background: linear-gradient(to bottom, #fff700, #ff8c00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 15px rgba(255,140,0,0.8));
+  margin: 0;
+  letter-spacing: 2px;
+}
+
+.win-amount {
+  font-size: 35px;
+  color: white;
+  margin: 15px 0;
+  text-shadow: 0 0 10px #00fff2;
+}
+
+.collect-btn {
+  padding: 15px 50px;
+  font-size: 20px;
+  font-family: 'Orbitron';
+  background: linear-gradient(180deg, #00ff88, #008f4c);
+  border: none;
+  border-radius: 50px;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 0 20px rgba(0,255,136,0.4);
+}
+
+/* Rays Rotation Animation */
+.rays {
+  position: absolute;
+  width: 600px; height: 600px;
+  background: conic-gradient(from 0deg, transparent, rgba(255,215,0,0.2), transparent 30deg);
+  animation: rotateRays 5s linear infinite;
+  z-index: -1;
+}
+
+@keyframes rotateRays {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes popScale {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Glow Effect for Gems */
+.glow {
+  filter: drop-shadow(0 0 15px gold) brightness(1.2);
+  transform: scale(1.1);
+  transition: 0.3s;
+}
 </style>
 </head>
 <body oncontextmenu="return false;"> 
+
 <div class="topbar">
   <div>👤 Player</div>
-  <div class="coins">💰 <span id="coins">1030</span></div>
+  <div class="coins">💰 <span id="coins">1000</span></div>
 </div>
 
-<div class="machine-container">
-  <div class="machine">
-    <img src="frame.png" class="frame">
-    <div class="reels">
-      <div class="reel" id="r1"></div>
-      <div class="reel" id="r2"></div>
-      <div class="reel" id="r3"></div>
-    </div>
+<div id="winOverlay">
+  <div class="rays"></div>
+  <div class="win-box">
+    <h1 class="win-title">BIG WIN!</h1>
+    <div class="win-amount" id="winLabel">+0</div>
+    <button class="collect-btn" onclick="closeWin()">COLLECT</button>
   </div>
-
-  <div class="sidebar">
-    <div class="sidebtn">🎁 Bonus</div>
-    <div class="sidebtn">500x</div>
-    <div class="sidebtn">100x</div>
-  </div>
-</div>
-
-<div class="controls">
-
-  <!-- BET BAR IMAGE -->
-  <div class="bet-bar">
-    <img src="bet-bar.png" alt="bet">
-    
-    <!-- clickable areas -->
-    <div class="bet-minus">-</div>
-    <div class="bet-text">BET 1</div>
-    <div class="bet-plus">+</div>
-  </div>
-
-  <!-- SPIN BUTTON IMAGE -->
-  <div class="spin-btn" id="spinBtn">
-    <img src="spin-btn.png" alt="spin">
-  </div>
-
 </div>
 
 <script src="script.js"></script>
-<script>
-const spinBtn = document.getElementById('spinBtn');
-
-// Normal click pe spin function call kare
-spinBtn.addEventListener('click', () => {
-    if (typeof spin === "function") spin(); // aapke script.js me spin function call hoga
-});
-
-// Long press / contextmenu safe without blocking normal click
-spinBtn.addEventListener('touchstart', e => e.stopPropagation(), {passive:true});
-spinBtn.addEventListener('mousedown', e => e.stopPropagation());
-
-// Prevent general long press / right click
-document.body.addEventListener('contextmenu', e => e.preventDefault());
-document.body.addEventListener('touchstart', e => {
-    const t = e.target;
-    if (!t.classList.contains('spin') && !t.classList.contains('sidebtn') && t.tagName !== 'IMG') {
-        return; 
-    }
-    e.preventDefault();
-}, {passive:false});
-
-/* 🔹 WIN GLOW JS HELPER */
-function handleWin(winPositions) {
-  // winPositions = [{reel:'r1', index:1}, ...]
-  winPositions.forEach(pos => {
-    const reel = document.getElementById(pos.reel);
-    const gem = reel.children[pos.index];
-    if(gem) {
-      gem.classList.add('win');
-      gem.addEventListener('animationend', () => {
-        gem.classList.remove('win');
-      });
-    }
-  });
-}
-
-// Example usage: middle gems glow
-// handleWin([{reel:'r1', index:1}, {reel:'r2', index:1}, {reel:'r3', index:1}]);
-</script>
-
 </body>
 </html>
