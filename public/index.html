@@ -130,7 +130,7 @@ body {
   bottom: 50px;
   width: 100%;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   padding: 10px 15px; /* 👈 thoda tight for better fit */
   z-index: 10;
@@ -139,13 +139,13 @@ body {
 /* BET BAR */
 .bet-bar {
   position: relative;
-  width: 80%;          /* 👈 60% → 70% (bada kiya) */
+  width: 90%;          /* 👈 60% → 70% (bada kiya) */
   max-width: 520px;    /* 👈 control for big screens */
 }
 
 .bet-bar img {
   width: 100%;
-  transform: scale(1.25); /* 👈 main trick (size bada dikhega) */
+  transform: scale(1.5); /* 👈 main trick (size bada dikhega) */
 }
 
 /* clickable areas */
@@ -180,10 +180,11 @@ body {
   pointer-events: none;
 }
 
-/* SPIN BUTTON */
 .spin-btn {
-  width: 28%;   /* 👈 35% → 28% (balance ke liye) */
+  width: 28%;
   max-width: 180px;
+  position: relative;  /* 👈 zaroori */
+  z-index: 20;         /* 👈 BET se upar */
 }
 
 .spin-btn img {
