@@ -130,25 +130,26 @@ body {
   bottom: 50px;
   width: 100%;
   display: flex;
-  justify-content: center;
+  justify-content: center;  /* 👈 BET ko center karega */
   align-items: center;
-  padding: 10px 15px; /* 👈 thoda tight for better fit */
+  padding: 10px 15px;
   z-index: 10;
 }
 
-/* BET BAR */
+/* BET BAR (CENTER) */
 .bet-bar {
   position: relative;
-  width: 90%;          /* 👈 60% → 70% (bada kiya) */
-  max-width: 520px;    /* 👈 control for big screens */
+  width: 90%;
+  max-width: 520px;
+  margin: 0 auto;   /* 👈 extra safety center */
 }
 
 .bet-bar img {
   width: 100%;
-  transform: scale(1.5); /* 👈 main trick (size bada dikhega) */
+  transform: scale(1.5);
 }
 
-/* clickable areas */
+/* CLICK AREAS */
 .bet-minus, .bet-plus {
   position: absolute;
   top: 0;
@@ -157,17 +158,10 @@ body {
   cursor: pointer;
 }
 
-/* LEFT (-) */
-.bet-minus {
-  left: 0;
-}
+.bet-minus { left: 0; }
+.bet-plus { right: 0; }
 
-/* RIGHT (+) */
-.bet-plus {
-  right: 0;
-}
-
-/* TEXT CENTER */
+/* TEXT */
 .bet-text {
   position: absolute;
   width: 100%;
@@ -176,15 +170,19 @@ body {
   text-align: center;
   color: white;
   font-weight: bold;
-  font-size: 22px;   /* 👈 bada aur clear */
+  font-size: 22px;
   pointer-events: none;
 }
 
+/* 🔥 SPIN BUTTON (RIGHT SIDE FIX) */
 .spin-btn {
+  position: absolute;   /* 👈 MAIN FIX */
+  right: 15px;          /* 👈 right side chipka */
+  bottom: 0;
+
   width: 28%;
   max-width: 180px;
-  position: relative;  /* 👈 zaroori */
-  z-index: 20;         /* 👈 BET se upar */
+  z-index: 20;
 }
 
 .spin-btn img {
@@ -196,7 +194,6 @@ body {
 .spin-btn:active img {
   transform: scale(0.95);
 }
-
 .bet-control {
   display: flex;
   align-items: center;
