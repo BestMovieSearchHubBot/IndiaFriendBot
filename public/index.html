@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Lucky Gems Slot - Jungle Edition</title>
+<title>Lucky Gems Slot</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;900&display=swap" rel="stylesheet">
 
 <style>
@@ -16,160 +17,232 @@
 }
 
 body {
-  margin: 0; padding: 0;
+  margin: 0;
+  padding: 0;
   font-family: 'Orbitron', sans-serif;
-  background: #000 url('bg.jpg') no-repeat center center fixed;
+  background: url('bg.jpg') no-repeat center center fixed;
   background-size: cover;
-  height: 100vh; overflow: hidden;
+  height: 100vh;
+  overflow: hidden;
   touch-action: none; 
 }
 
 /* TOP BAR */
 .topbar {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 10px 15px; background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(5px); color: white;
-  position: relative; z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(5px);
+  color: white;
+  position: relative;
+  z-index: 10;
 }
 
 .coins {
-  background: #111; padding: 5px 15px;
-  border-radius: 20px; border: 1px solid #ffd700;
+  background: #111;
+  padding: 5px 15px;
+  border-radius: 20px;
+  border: 1px solid #ffd700;
 }
 
 /* MACHINE CONTAINER */
 .machine-container {
-  display: flex; justify-content: center; align-items: center;
-  margin-top: 150px; position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 220px; 
+  position: relative;
 }
 
 .machine {
   position: relative;
-  width: 350px; height: 350px; 
+  width: 350px; 
+  height: 350px; 
 }
 
 .frame {
-  position: absolute; top: 0; left: 0;
-  width: 100%; height: 100%;
-  z-index: 5; pointer-events: none; 
-  transform: scale(1.25);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none; 
+  transform: scale(1.25); 
+  transform-origin: center;
 }
 
 .reels {
-  position: absolute; top: 28px; left: -8px;  
-  width: 365px; height: 350px; 
-  display: flex; justify-content: center; 
-  gap: 10px; overflow: hidden; z-index: 2;
+  position: absolute;
+  top: 28px;    
+  left: -8px;  
+  width: 365px; 
+  height: 350px; 
+  display: flex;
+  justify-content: center; 
+  gap: 10px;    
+  overflow: hidden; 
+  z-index: 2;
 }
 
 .reel {
-  display: flex; flex-direction: column;
-  width: 85px; align-items: center;
+  display: flex;
+  flex-direction: column;
+  width: 85px;  
+  align-items: center;
 }
 
 .reel img {
-  width: 85px; height: 85px; 
-  object-fit: contain; margin-bottom: 18px; 
+  width: 85px;  
+  height: 85px; 
+  object-fit: contain;
+  margin-bottom: 18px; 
 }
 
 /* SIDEBAR */
 .sidebar {
-  position: absolute; right: 5px; top: 50%;
-  transform: translateY(-50%); display: flex;
-  flex-direction: column; gap: 8px; z-index: 4;
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 4;
 }
 
 .sidebtn {
   background: linear-gradient(180deg, #9c27b0, #4a148c);
-  padding: 12px 8px; border-radius: 8px;
-  color: white; text-align: center; font-size: 10px;
+  padding: 12px 8px;
+  border-radius: 8px;
+  color: white;
+  text-align: center;
+  font-size: 12px;
   border: 1px solid #ffffff50;
 }
 
-/* CONTROLS */
 .controls {
-  position: fixed; bottom: 40px;
-  width: 100%; display: flex;
-  justify-content: center; align-items: center;
-  padding: 0 20px; z-index: 20;
+  position: fixed;
+  bottom: 50px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 15px;
+  z-index: 10;
 }
 
 .bet-bar {
-  position: relative; width: 65%; max-width: 350px;
+  position: relative;
+  width: 90%;
+  max-width: 520px;
 }
 
-.bet-bar img { width: 100%; transform: scale(1.3); }
+.bet-bar img {
+  width: 100%;
+  transform: scale(1.5);
+}
 
 .bet-text {
-  position: absolute; width: 100%; top: 50%;
-  transform: translateY(-50%); text-align: center;
-  color: white; font-weight: bold; font-size: 18px;
+  position: absolute;
+  width: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: center;
+  color: white;
+  font-weight: bold;
+  font-size: 20px;
 }
 
 .spin-btn {
-  margin-left: 20px; width: 110px; cursor: pointer;
+  position: absolute;
+  right: 15px;
+  bottom: 15px;
+  width: 28%;
+  max-width: 180px;
+  z-index: 20;
 }
 
-.spin-btn img { width: 100%; transition: 0.1s; }
-.spin-btn:active img { transform: scale(0.9); }
+.spin-btn img {
+  width: 100%;
+  cursor: pointer;
+}
 
-/* 🌿 JUNGLE THEME WIN OVERLAY */
+/* ✨ NEW: WIN OVERLAY STYLE (CASINO TYPE) */
 #winOverlay {
-  display: none; position: fixed; 
-  top: 0; left: 0; width: 100%; height: 100%; 
-  background: rgba(0,0,0,0.85); z-index: 9999; 
-  flex-direction: column; justify-content: center; align-items: center;
+  display: none; 
+  position: fixed; 
+  top: 0; left: 0; 
+  width: 100%; height: 100%; 
+  background: rgba(0,0,0,0.9); 
+  z-index: 1000; 
+  flex-direction: column; 
+  justify-content: center; 
+  align-items: center;
 }
 
 .win-box {
-  background: linear-gradient(135deg, #3d2b1f 0%, #1a0f0a 100%);
-  border: 4px solid #d4af37; padding: 40px;
-  border-radius: 20px; text-align: center;
-  box-shadow: 0 0 50px rgba(0,0,0,0.9);
-  animation: junglePop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  position: relative; z-index: 10001;
+  position: relative;
+  text-align: center;
+  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .win-title {
-  font-weight: 900; font-size: 45px;
-  color: #fff; text-shadow: 0 0 15px #d4af37, 2px 2px #000;
-  margin: 0; letter-spacing: 2px;
+  font-weight: 900;
+  font-size: 50px;
+  background: linear-gradient(to bottom, #fff700, #ff8c00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 15px gold);
+  margin: 0;
 }
 
 .win-amount {
-  font-size: 35px; color: #ffd700;
-  margin: 15px 0; font-weight: bold;
+  font-size: 35px;
+  color: white;
+  margin: 15px 0;
+  text-shadow: 0 0 10px #00fff2;
 }
 
 .collect-btn {
-  padding: 15px 50px; font-size: 18px;
-  font-family: 'Orbitron'; font-weight: bold;
-  background: linear-gradient(180deg, #d4af37, #8a6d1a);
-  border: none; border-radius: 10px;
-  color: #fff; cursor: pointer;
-  box-shadow: 0 5px 0 #4d3a0a;
+  padding: 15px 50px;
+  font-size: 18px;
+  font-family: 'Orbitron';
+  background: linear-gradient(180deg, #ffb300, #fb8c00);
+  border: none;
+  border-radius: 50px;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #b35900;
 }
 
 .rays {
-  position: absolute; width: 600px; height: 600px;
-  background: radial-gradient(circle, rgba(212,175,55,0.2) 0%, transparent 70%);
-  animation: rotateRays 8s linear infinite; z-index: 10000;
+  position: absolute;
+  width: 600px; height: 600px;
+  background: conic-gradient(from 0deg, transparent, rgba(255,215,0,0.2), transparent 30deg);
+  animation: rotateRays 5s linear infinite;
+  z-index: -1;
 }
 
 @keyframes rotateRays { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-@keyframes junglePop { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
 
-.glow { 
-  filter: drop-shadow(0 0 15px rgba(212,175,55,0.9)) brightness(1.3); 
-  transform: scale(1.1); transition: 0.3s; 
+/* ✨ GLOW FOR GEMS */
+.glow {
+  filter: drop-shadow(0 0 15px gold) brightness(1.2);
+  transform: scale(1.1);
+  transition: 0.3s;
 }
 </style>
 </head>
 <body oncontextmenu="return false;"> 
 
 <div class="topbar">
-  <div>👤 PLAYER</div>
-  <div class="coins">💰 <span id="coins">1000</span></div>
+  <div>👤 Player</div>
+  <div class="coins">💰 <span id="coins">1030</span></div>
 </div>
 
 <div class="machine-container">
@@ -191,145 +264,64 @@ body {
 
 <div class="controls">
   <div class="bet-bar">
-    <img src="bet-bar.png">
+    <img src="bet-bar.png" alt="bet">
     <div class="bet-text">BET 1</div>
   </div>
+
   <div class="spin-btn" id="spinBtn">
-    <img src="spin-btn.png">
+    <img src="spin-btn.png" alt="spin">
   </div>
 </div>
 
 <div id="winOverlay">
   <div class="rays"></div>
   <div class="win-box">
-    <h1 class="win-title">BIG WIN</h1>
+    <h1 class="win-title">BIG WIN!</h1>
     <div class="win-amount" id="winLabel">+0</div>
     <button class="collect-btn" onclick="closeWin()">COLLECT</button>
   </div>
 </div>
 
+<script src="script.js"></script>
 <script>
-// --- JAVASCRIPT LOGIC ---
-const gems = [
-  "https://cdn.jsdelivr.net/gh/BestMovieSearchHubBot/IndiaFriendBot@main/public/gems/red.png",
-  "https://cdn.jsdelivr.net/gh/BestMovieSearchHubBot/IndiaFriendBot@main/public/gems/blue.png",
-  "https://cdn.jsdelivr.net/gh/BestMovieSearchHubBot/IndiaFriendBot@main/public/gems/green.png",
-  "https://cdn.jsdelivr.net/gh/BestMovieSearchHubBot/IndiaFriendBot@main/public/gems/yellow.png",
-  "https://cdn.jsdelivr.net/gh/BestMovieSearchHubBot/IndiaFriendBot@main/public/gems/purple.png"
-];
+// SPIN BUTTON LOGIC
+const spinBtn = document.getElementById('spinBtn');
+spinBtn.addEventListener('click', () => {
+    if (typeof spin === "function") spin(); 
+});
 
-let coinsEl = document.getElementById("coins");
-let coins = 1000;
-let isSpinning = false;
-let finishedReels = 0;
+// PREVENT LONG PRESS
+document.body.addEventListener('contextmenu', e => e.preventDefault());
 
-function createReel(id){
-  let reel = document.getElementById(id);
-  reel.innerHTML = "";
-  let reelImages = [];
-  while(reelImages.length < 15){
-    let gem = gems[Math.floor(Math.random() * gems.length)];
-    reelImages.push(gem);
-  }
-  reelImages.forEach(src => {
-    let img = document.createElement("img");
-    img.src = src;
-    reel.appendChild(img);
-  });
-}
-
-// Initial reels
-createReel("r1"); createReel("r2"); createReel("r3");
-
-function spin(){
-  if(isSpinning) return;
-  isSpinning = true;
-  finishedReels = 0;
-  spinReel("r1", 0);
-  spinReel("r2", 300);
-  spinReel("r3", 600);
-}
-
-function spinReel(id, delay){
-  const reel = document.getElementById(id);
-  const imgHeight = 85 + 18; 
-  const totalHeight = imgHeight * reel.children.length;
-  let start = null;
-  let duration = 2500 + delay;
-
-  function animate(timestamp){
-    if(!start) start = timestamp;
-    let progress = timestamp - start;
-    let t = Math.min(progress / duration, 1);
-    let eased = 1 - Math.pow(1 - t, 3);
-    let move = eased * (totalHeight * 4);
-    reel.style.transform = `translateY(${-move % totalHeight}px)`;
-
-    if(progress < duration){
-      requestAnimationFrame(animate);
-    } else {
-      reel.style.transform = "translateY(0)";
-      createReel(id);
-      finishedReels++;
-      if(finishedReels === 3){
-        setTimeout(checkWin, 300);
-      }
-    }
-  }
-  setTimeout(() => requestAnimationFrame(animate), delay);
-}
-
-function checkWin(){
-  let reels = [document.getElementById("r1"), document.getElementById("r2"), document.getElementById("r3")];
-  let totalWin = 0;
-  let glowTargets = [];
-
-  for(let row=0; row<3; row++){
-    let a = reels[0].children[row], b = reels[1].children[row], c = reels[2].children[row];
-    if(a.src === b.src && b.src === c.src){
-      totalWin += 50; glowTargets.push(a, b, c);
-    } else if(a.src === b.src || b.src === c.src || a.src === c.src){
-      totalWin += 10;
-      if(a.src === b.src) glowTargets.push(a, b);
-      if(b.src === c.src) glowTargets.push(b, c);
-      if(a.src === c.src) glowTargets.push(a, c);
-    }
-  }
-
-  if(totalWin > 0){
-    glowTargets.forEach(img => img.classList.add("glow"));
-    setTimeout(() => showWinAnimation(totalWin), 500);
-  } else {
-    isSpinning = false;
-  }
-}
-
+/* 🔹 WIN OVERLAY FUNCTIONS (Call these from script.js) */
 function showWinAnimation(amount) {
   const overlay = document.getElementById("winOverlay");
   const winLabel = document.getElementById("winLabel");
+  const coinsEl = document.getElementById("coins");
+
   winLabel.innerText = "+" + amount + " COINS";
   overlay.style.display = "flex";
 
-  let startCoins = coins;
-  coins += amount;
-  let current = startCoins;
-  let interval = setInterval(() => {
-    if(current < coins){
-      current++;
-      coinsEl.innerText = current;
-    } else {
-      clearInterval(interval);
+  // Smooth Coin Count-up
+  let currentCoins = parseInt(coinsEl.innerText);
+  let targetCoins = currentCoins + amount;
+  let step = Math.ceil(amount / 20);
+  
+  let counter = setInterval(() => {
+    currentCoins += step;
+    if (currentCoins >= targetCoins) {
+      currentCoins = targetCoins;
+      clearInterval(counter);
     }
-  }, 20);
+    coinsEl.innerText = currentCoins;
+  }, 50);
 }
 
 function closeWin() {
   document.getElementById("winOverlay").style.display = "none";
   document.querySelectorAll('.glow').forEach(el => el.classList.remove('glow'));
-  isSpinning = false;
 }
-
-document.getElementById('spinBtn').onclick = spin;
 </script>
+
 </body>
 </html>
