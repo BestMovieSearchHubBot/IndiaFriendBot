@@ -50,25 +50,44 @@ function spin(){
   spinReel("r3", 400);
 }
 
-// spin animation
+// 🎰 SMOOTH CASINO SPIN (UPDATED)
 function spinReel(id, delay){
   const reel = document.getElementById(id);
-  let top = 0;
-  const speed = 20;
   const imgHeight = 69;
+  const totalHeight = imgHeight * reel.children.length;
 
-  const interval = setInterval(()=>{
-    top -= 10;
-    if(top <= -imgHeight * reel.children.length) top = 0;
-    reel.style.transform = `translateY(${top}px)`;
-  }, speed);
+  let start = null;
+  let duration = 2500 + delay;
+
+  function easeOut(t){
+    return 1 - Math.pow(1 - t, 3); // smooth slow down
+  }
+
+  function animate(timestamp){
+    if(!start) start = timestamp;
+    let progress = timestamp - start;
+
+    let t = Math.min(progress / duration, 1);
+    let eased = easeOut(t);
+
+    // 3 full spins + slow stop
+    let move = eased * (totalHeight * 3);
+    reel.style.transform = `translateY(${-move % totalHeight}px)`;
+
+    if(progress < duration){
+      requestAnimationFrame(animate);
+    } else {
+      // stop clean
+      reel.style.transform = "translateY(0)";
+      createReel(id);
+
+      if(id === "r3") checkWin();
+    }
+  }
 
   setTimeout(()=>{
-    clearInterval(interval);
-    reel.style.transform = "translateY(0)";
-    createReel(id);
-    if(id === "r3") checkWin(); // check win after last reel
-  }, 2000 + delay);
+    requestAnimationFrame(animate);
+  }, delay);
 }
 
 // check for adjacent matches
@@ -76,7 +95,6 @@ function checkWin(){
   let reels = [document.getElementById("r1"), document.getElementById("r2"), document.getElementById("r3")];
   let visibleGems = [];
 
-  // get visible 3 gems from each reel (first 3 images)
   reels.forEach(r => {
     visibleGems.push(r.children[0].src);
     visibleGems.push(r.children[1].src);
@@ -86,31 +104,29 @@ function checkWin(){
   let totalWin = 0;
   let glowTargets = [];
 
-  // check horizontal rows
   for(let row=0; row<3; row++){
     let a = reels[0].children[row];
     let b = reels[1].children[row];
     let c = reels[2].children[row];
 
     if(a.src===b.src && b.src===c.src){
-      totalWin += 50; // 3 in a row big win
+      totalWin += 50;
       glowTargets.push(a,b,c);
-      console.log("BIG WIN!", a.src, b.src, c.src);
     } else if(a.src===b.src || b.src===c.src || a.src===c.src){
-      totalWin += 10; // 2 in a row normal win
-      // add only matching 2 for glow
+      totalWin += 10;
+
       if(a.src===b.src) glowTargets.push(a,b);
       if(b.src===c.src) glowTargets.push(b,c);
       if(a.src===c.src) glowTargets.push(a,c);
-      console.log("WIN!", a.src, b.src, c.src);
     }
   }
 
   if(totalWin>0){
     coins += totalWin;
     coinsEl.textContent = coins;
-    // Add glow effect
+
     glowTargets.forEach(img => img.classList.add("glow"));
+
     setTimeout(()=>{
       glowTargets.forEach(img => img.classList.remove("glow"));
     }, 1500);
