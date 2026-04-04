@@ -3,285 +3,357 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Lucky Gems Slot</title>
-
+<title>Lucky Gems Slot - Real Store</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;900&display=swap" rel="stylesheet">
-
 <style>
-* { 
-  box-sizing: border-box; 
-  -webkit-touch-callout: none; 
-  -webkit-user-select: none; 
-  user-select: none; 
-  -webkit-tap-highlight-color: transparent;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Orbitron', sans-serif;
-  background: url('bg.jpg') no-repeat center center fixed;
-  background-size: cover;
-  height: 100vh;
-  overflow: hidden;
-  touch-action: none; 
-}
-
-/* TOP BAR */
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 15px;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(5px);
-  color: white;
-  position: relative;
-  z-index: 10;
-}
-
-.coins {
-  background: #111;
-  padding: 5px 15px;
-  border-radius: 20px;
-  border: 1px solid #ffd700;
-}
-
-/* MACHINE CONTAINER */
-.machine-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 220px; 
-  position: relative;
-}
-
-.machine {
-  position: relative;
-  width: 350px; 
-  height: 350px; 
-}
-
-.frame {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 3;
-  pointer-events: none; 
-  transform: scale(1.25); 
-  transform-origin: center;
-}
-
-.reels {
-  position: absolute;
-  top: 28px;    
-  left: -8px;  
-  width: 365px; 
-  height: 350px; 
-  display: flex;
-  justify-content: center; 
-  gap: 10px;    
-  overflow: hidden; 
-  z-index: 2;
-}
-
-.reel {
-  display: flex;
-  flex-direction: column;
-  width: 85px;  
-  align-items: center;
-}
-
-.reel img {
-  width: 85px;  
-  height: 85px; 
-  object-fit: contain;
-  margin-bottom: 18px; 
-}
-
-/* SIDEBAR */
-.sidebar {
-  position: absolute;
-  right: 5px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  z-index: 4;
-}
-
-.sidebtn {
-  background: linear-gradient(180deg, #9c27b0, #4a148c);
-  padding: 12px 8px;
-  border-radius: 8px;
-  color: white;
-  text-align: center;
-  font-size: 12px;
-  border: 1px solid #ffffff50;
-}
-
-.controls {
-  position: fixed;
-  bottom: 50px;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 10px 15px;
-  z-index: 10;
-}
-
-.bet-bar {
-  position: relative;
-  width: 90%;
-  max-width: 520px;
-}
-
-.bet-bar img {
-  width: 100%;
-  transform: scale(1.5);
-}
-
-.bet-text {
-  position: absolute;
-  width: 100%;
-  top: 50%;
-  transform: translateY(-50%);
-  text-align: center;
-  color: white;
-  font-weight: bold;
-  font-size: 20px;
-}
-
-.spin-btn {
-  position: absolute;
-  right: 15px;
-  bottom: 15px;
-  width: 28%;
-  max-width: 180px;
-  z-index: 20;
-}
-
-.spin-btn img {
-  width: 100%;
-  cursor: pointer;
-}
-
-/* ✨ WIN OVERLAY STYLE */
-#winOverlay {
-  display: none; 
-  position: fixed; 
-  top: 0; left: 0; 
-  width: 100%; height: 100%; 
-  background: rgba(0,0,0,0.9); 
-  z-index: 1000; 
-  flex-direction: column; 
-  justify-content: center; 
-  align-items: center;
-}
-
-.win-box {
-  position: relative;
-  text-align: center;
-  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.win-title {
-  font-weight: 900;
-  font-size: 50px;
-  background: linear-gradient(to bottom, #fff700, #ff8c00);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 15px gold);
-  margin: 0;
-}
-
-.win-amount {
-  font-size: 35px;
-  color: white;
-  margin: 15px 0;
-  text-shadow: 0 0 10px #00fff2;
-}
-
-.collect-btn {
-  padding: 15px 50px;
-  font-size: 18px;
-  font-family: 'Orbitron';
-  background: linear-gradient(180deg, #ffb300, #fb8c00);
-  border: none;
-  border-radius: 50px;
-  color: #000;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0 5px 0 #b35900;
-}
-
-.rays {
-  position: absolute;
-  width: 600px; height: 600px;
-  background: conic-gradient(from 0deg, transparent, rgba(255,215,0,0.2), transparent 30deg);
-  animation: rotateRays 5s linear infinite;
-  z-index: -1;
-}
-
+/* ===== YOUR ORIGINAL CSS (exactly as provided) ===== */
+* { box-sizing: border-box; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+body { margin: 0; padding: 0; font-family: 'Orbitron', sans-serif; background: url('bg.jpg') no-repeat center center fixed; background-size: cover; height: 100vh; overflow: hidden; touch-action: none; }
+.topbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); color: white; position: relative; z-index: 10; }
+.coins { background: #111; padding: 5px 15px; border-radius: 20px; border: 1px solid #ffd700; }
+.machine-container { display: flex; justify-content: center; align-items: center; margin-top: 220px; position: relative; }
+.machine { position: relative; width: 350px; height: 350px; }
+.frame { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; transform: scale(1.25); transform-origin: center; }
+.reels { position: absolute; top: 28px; left: -8px; width: 365px; height: 350px; display: flex; justify-content: center; gap: 10px; overflow: hidden; z-index: 2; }
+.reel { display: flex; flex-direction: column; width: 85px; align-items: center; }
+.reel img { width: 85px; height: 85px; object-fit: contain; margin-bottom: 18px; }
+.sidebar { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 4; }
+.sidebtn { background: linear-gradient(180deg, #9c27b0, #4a148c); padding: 12px 8px; border-radius: 8px; color: white; text-align: center; font-size: 12px; border: 1px solid #ffffff50; cursor: pointer; }
+.controls { position: fixed; bottom: 50px; width: 100%; display: flex; justify-content: center; align-items: center; padding: 10px 15px; z-index: 10; }
+.bet-bar { position: relative; width: 90%; max-width: 520px; }
+.bet-bar img { width: 100%; transform: scale(1.5); }
+.bet-text { position: absolute; width: 100%; top: 50%; transform: translateY(-50%); text-align: center; color: white; font-weight: bold; font-size: 20px; }
+.spin-btn { position: absolute; right: 15px; bottom: 15px; width: 28%; max-width: 180px; z-index: 20; }
+.spin-btn img { width: 100%; cursor: pointer; }
+#winOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; flex-direction: column; justify-content: center; align-items: center; }
+.win-box { position: relative; text-align: center; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.win-title { font-weight: 900; font-size: 50px; background: linear-gradient(to bottom, #fff700, #ff8c00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 15px gold); margin: 0; }
+.win-amount { font-size: 35px; color: white; margin: 15px 0; text-shadow: 0 0 10px #00fff2; }
+.collect-btn { padding: 15px 50px; font-size: 18px; font-family: 'Orbitron'; background: linear-gradient(180deg, #ffb300, #fb8c00); border: none; border-radius: 50px; color: #000; font-weight: bold; cursor: pointer; box-shadow: 0 5px 0 #b35900; }
+.rays { position: absolute; width: 600px; height: 600px; background: conic-gradient(from 0deg, transparent, rgba(255,215,0,0.2), transparent 30deg); animation: rotateRays 5s linear infinite; z-index: -1; }
 @keyframes rotateRays { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+.glow { filter: drop-shadow(0 0 15px gold) brightness(1.2); transform: scale(1.1); transition: 0.3s; }
 
-/* ✨ GLOW FOR GEMS */
-.glow {
-  filter: drop-shadow(0 0 15px gold) brightness(1.2);
-  transform: scale(1.1);
-  transition: 0.3s;
-}
+/* extra UI for referral & redeem */
+.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
+.modal-content { background: #1e1a0e; padding: 20px; border-radius: 20px; border: 2px solid gold; width: 90%; max-width: 400px; color: white; font-family: monospace; }
+.modal-content input, .modal-content select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 10px; }
+.refer-box { position: fixed; bottom: 140px; left: 20px; background: rgba(0,0,0,0.7); padding: 8px 12px; border-radius: 30px; font-size: 12px; z-index: 15; cursor: pointer; }
+.redeem-btn { position: fixed; bottom: 140px; right: 20px; background: rgba(0,0,0,0.7); padding: 8px 12px; border-radius: 30px; font-size: 12px; z-index: 15; cursor: pointer; }
 </style>
 </head>
-<body oncontextmenu="return false;"> 
+<body>
+<div class="topbar"><div>👤 <span id="username">Player</span></div><div class="coins">💰 <span id="coins">0.00</span></div></div>
+<div class="machine-container"><div class="machine"><img src="frame.png" class="frame"><div class="reels"><div class="reel" id="r1"></div><div class="reel" id="r2"></div><div class="reel" id="r3"></div></div></div><div class="sidebar"><div class="sidebtn">🎁 Bonus</div><div class="sidebtn">500x</div><div class="sidebtn">100x</div></div></div>
+<div class="controls"><div class="bet-bar"><img src="bet-bar.png" alt="bet"><div class="bet-text">BET 1</div></div><div class="spin-btn" id="spinBtn"><img src="spin-btn.png" alt="spin"></div></div>
+<div id="winOverlay"><div class="rays"></div><div class="win-box"><h1 class="win-title">BIG WIN!</h1><div class="win-amount" id="winLabel">+0</div><button class="collect-btn" id="collectBtn">COLLECT</button></div></div>
 
-<div class="topbar">
-  <div>👤 Player</div>
-  <div class="coins">💰 <span id="coins">1030</span></div>
-</div>
+<!-- Referral & Redeem UI -->
+<div class="refer-box" id="referBtn">🔗 REFER & GET 10</div>
+<div class="redeem-btn" id="redeemBtn">🎁 REDEEM</div>
 
-<div class="machine-container">
-  <div class="machine">
-    <img src="frame.png" class="frame">
-    <div class="reels">
-      <div class="reel" id="r1"></div>
-      <div class="reel" id="r2"></div>
-      <div class="reel" id="r3"></div>
-    </div>
-  </div>
+<div id="referModal" class="modal"><div class="modal-content"><h3>Your Referral Code</h3><p id="referCodeDisplay">Loading...</p><p>Share this code with friends. They get 10 coins, you get 10 coins!</p><button id="closeReferModal">Close</button></div></div>
 
-  <div class="sidebar">
-    <div class="sidebtn">🎁 Bonus</div>
-    <div class="sidebtn">500x</div>
-    <div class="sidebtn">100x</div>
-  </div>
-</div>
+<div id="redeemModal" class="modal"><div class="modal-content"><h3>Redeem Rewards</h3>
+<select id="redeemType"><option value="amazon">Amazon Gift Voucher (500 coins)</option><option value="googleplay">Google Play Voucher (500 coins)</option><option value="freediamond">Free Fire 500 Diamonds (420 coins)</option></select>
+<div id="emailField"><input type="email" id="redeemEmail" placeholder="Your Email for Voucher"></div>
+<div id="uidField" style="display:none"><input type="text" id="redeemUid" placeholder="Free Fire UID"></div>
+<button id="submitRedeem">Redeem</button><button id="closeRedeemModal">Cancel</button>
+<p id="redeemMsg"></p></div></div>
 
-<div class="controls">
-  <div class="bet-bar">
-    <img src="bet-bar.png" alt="bet">
-    <div class="bet-text">BET 1</div>
-  </div>
+<script>
+// Global state
+let userId = null;
+let currentCoins = 0;
+let isSpinning = false;
+let bigWinAmount = 0;
 
-  <div class="spin-btn" id="spinBtn">
-    <img src="spin-btn.png" alt="spin">
-  </div>
-</div>
+const gemsList = [
+  "https://cdn.jsdelivr.net/gh/BestMovieSearchHubBot/IndiaFriendBot@main/public/gems/red.png",
+  "https://cdn.jsdelivr.net/gh/BestMovieSearchHubBot/IndiaFriendBot@main/public/gems/blue.png",
+  "https://cdn.jsdelivr.net/gh/BestMovieSearchHubBot/IndiaFriendBot@main/public/gems/green.png",
+  "https://cdn.jsdelivr.net/gh/BestMovieSearchHubBot/IndiaFriendBot@main/public/gems/yellow.png",
+  "https://cdn.jsdelivr.net/gh/BestMovieSearchHubBot/IndiaFriendBot@main/public/gems/purple.png"
+];
 
-<div id="winOverlay">
-  <div class="rays"></div>
-  <div class="win-box">
-    <h1 class="win-title">BIG WIN!</h1>
-    <div class="win-amount" id="winLabel">+0</div>
-    <button class="collect-btn" id="collectBtn">COLLECT</button>
-  </div>
-</div>
+// Helper: create reel with 15 random images (3 copies each, shuffled)
+function createReelDom(id, imagesArray) {
+  const reel = document.getElementById(id);
+  reel.innerHTML = "";
+  // imagesArray is array of 15 image URLs
+  imagesArray.forEach(src => {
+    let img = document.createElement("img");
+    img.src = src;
+    reel.appendChild(img);
+  });
+}
 
-<script src="script.js"></script>
+function generateRandomReelImages() {
+  let gemCount = {};
+  gemsList.forEach(g => gemCount[g] = 0);
+  let arr = [];
+  while (arr.length < 15) {
+    let gem = gemsList[Math.floor(Math.random() * gemsList.length)];
+    if (gemCount[gem] < 3) {
+      arr.push(gem);
+      gemCount[gem]++;
+    }
+  }
+  arr.sort(() => Math.random() - 0.5);
+  return arr;
+}
+
+// Initialize reels
+function initReels() {
+  createReelDom("r1", generateRandomReelImages());
+  createReelDom("r2", generateRandomReelImages());
+  createReelDom("r3", generateRandomReelImages());
+}
+initReels();
+
+// Update coin display with 2 decimals
+function updateCoinDisplay() {
+  document.getElementById("coins").innerText = currentCoins.toFixed(2);
+}
+
+// Spin animation (preserves original look but uses final matrix from server)
+function animateSpin(finalMatrix, winAmount, newCoins) {
+  return new Promise((resolve) => {
+    let spins = 0;
+    const totalSpins = 20;
+    const interval = setInterval(() => {
+      // show random symbols during spin
+      for (let i = 1; i <= 3; i++) {
+        let randomImgs = [];
+        for (let s = 0; s < 15; s++) randomImgs.push(gemsList[Math.floor(Math.random() * gemsList.length)]);
+        createReelDom(`r${i}`, randomImgs);
+      }
+      spins++;
+      if (spins >= totalSpins) {
+        clearInterval(interval);
+        // set final result
+        for (let col = 0; col < 3; col++) {
+          let colImages = [];
+          for (let row = 0; row < 3; row++) {
+            colImages.push(finalMatrix[row][col]);
+          }
+          // Need 15 images, repeat pattern? Actually for display we only need top 3 visible. Simpler: recreate reel with 15 images where top 3 are the final row symbols.
+          let fullReel = [...colImages, ...colImages, ...colImages, ...colImages, ...colImages].slice(0,15);
+          createReelDom(`r${col+1}`, fullReel);
+        }
+        resolve();
+      }
+    }, 50);
+  });
+}
+
+// Show normal win count-up (no popup)
+function updateCoinsSmooth(targetCoins, callback) {
+  let start = currentCoins;
+  let step = Math.max(0.05, (targetCoins - start) / 20);
+  let interval = setInterval(() => {
+    start += step;
+    if (start >= targetCoins) {
+      start = targetCoins;
+      clearInterval(interval);
+      currentCoins = targetCoins;
+      updateCoinDisplay();
+      if (callback) callback();
+    } else {
+      currentCoins = start;
+      updateCoinDisplay();
+    }
+  }, 30);
+}
+
+// Big win overlay
+function showBigWinOverlay(amount) {
+  document.getElementById("winLabel").innerText = `+${amount.toFixed(2)} COINS`;
+  document.getElementById("winOverlay").style.display = "flex";
+  bigWinAmount = amount;
+}
+
+function closeWin() {
+  document.getElementById("winOverlay").style.display = "none";
+  // add coins after collect
+  updateCoinsSmooth(currentCoins + bigWinAmount, () => {
+    isSpinning = false;
+    enableSpinButton(true);
+  });
+  bigWinAmount = 0;
+}
+
+// Spin API call
+async function spin() {
+  if (isSpinning) return;
+  isSpinning = true;
+  enableSpinButton(false);
+  
+  // Deduct 1 coin locally optimistic? Better call backend first
+  try {
+    const res = await fetch('/api/spin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId })
+    });
+    const data = await res.json();
+    if (res.status !== 200) throw new Error(data.error);
+    // Deduct 1 coin from current display
+    currentCoins = data.newCoins - data.win; // after deduction, before win addition
+    updateCoinDisplay();
+    
+    // Animate spin with result matrix
+    await animateSpin(data.matrix, data.win, data.newCoins);
+    
+    // Highlight winning rows (glow) - compute from matrix
+    highlightWins(data.matrix);
+    
+    if (data.win > 0) {
+      if (data.win >= 15) {
+        showBigWinOverlay(data.win);
+        // spin remains locked until collect
+      } else {
+        // normal win count-up
+        updateCoinsSmooth(currentCoins + data.win, () => {
+          isSpinning = false;
+          enableSpinButton(true);
+          clearGlows();
+        });
+      }
+    } else {
+      isSpinning = false;
+      enableSpinButton(true);
+      clearGlows();
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Spin failed: " + err.message);
+    isSpinning = false;
+    enableSpinButton(true);
+  }
+}
+
+function highlightWins(matrix) {
+  clearGlows();
+  // matrix is 3x3 (rows, cols)
+  for (let row = 0; row < 3; row++) {
+    const a = matrix[row][0];
+    const b = matrix[row][1];
+    const c = matrix[row][2];
+    if (a === b && b === c) {
+      // all three
+      for (let col = 0; col < 3; col++) {
+        const reelDiv = document.getElementById(`r${col+1}`);
+        const imgs = reelDiv.children;
+        if (imgs[row]) imgs[row].classList.add('glow');
+      }
+    } else if (a === b || b === c || a === c) {
+      let pairs = [];
+      if (a === b) pairs.push([0,1]);
+      if (b === c) pairs.push([1,2]);
+      if (a === c) pairs.push([0,2]);
+      for (let pair of pairs) {
+        for (let col of pair) {
+          const reelDiv = document.getElementById(`r${col+1}`);
+          const imgs = reelDiv.children;
+          if (imgs[row]) imgs[row].classList.add('glow');
+        }
+      }
+    }
+  }
+}
+
+function clearGlows() {
+  document.querySelectorAll('.glow').forEach(el => el.classList.remove('glow'));
+}
+
+function enableSpinButton(enabled) {
+  const btn = document.getElementById("spinBtn");
+  if (enabled) {
+    btn.style.pointerEvents = "auto";
+    btn.style.opacity = "1";
+  } else {
+    btn.style.pointerEvents = "none";
+    btn.style.opacity = "0.6";
+  }
+}
+
+// Authentication & referral
+async function initAuth() {
+  let username = localStorage.getItem('slotUsername');
+  let referCode = new URLSearchParams(window.location.search).get('ref');
+  if (!username) {
+    username = prompt("Enter your username:", "Player" + Math.floor(Math.random()*1000));
+    if (!username) username = "Guest" + Date.now();
+  }
+  const res = await fetch('/api/auth', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, referCode })
+  });
+  const data = await res.json();
+  userId = data.userId;
+  currentCoins = data.coins;
+  updateCoinDisplay();
+  document.getElementById("username").innerText = data.username;
+  localStorage.setItem('slotUsername', data.username);
+  // store referral code for later
+  window.myReferralCode = data.referralCode;
+}
+
+// Referral modal
+document.getElementById("referBtn").onclick = () => {
+  document.getElementById("referCodeDisplay").innerText = window.myReferralCode || "Loading...";
+  document.getElementById("referModal").style.display = "flex";
+};
+document.getElementById("closeReferModal").onclick = () => document.getElementById("referModal").style.display = "none";
+
+// Redeem modal logic
+document.getElementById("redeemBtn").onclick = () => {
+  document.getElementById("redeemModal").style.display = "flex";
+  document.getElementById("redeemMsg").innerText = "";
+};
+document.getElementById("closeRedeemModal").onclick = () => document.getElementById("redeemModal").style.display = "none";
+document.getElementById("redeemType").onchange = function() {
+  if (this.value === "freediamond") {
+    document.getElementById("emailField").style.display = "none";
+    document.getElementById("uidField").style.display = "block";
+  } else {
+    document.getElementById("emailField").style.display = "block";
+    document.getElementById("uidField").style.display = "none";
+  }
+};
+document.getElementById("submitRedeem").onclick = async () => {
+  const type = document.getElementById("redeemType").value;
+  let email = null, uid = null;
+  if (type === "freediamond") {
+    uid = document.getElementById("redeemUid").value;
+    if (!uid) { alert("Enter UID"); return; }
+  } else {
+    email = document.getElementById("redeemEmail").value;
+    if (!email) { alert("Enter email"); return; }
+  }
+  const res = await fetch('/api/redeem', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId, type, email, uid })
+  });
+  const data = await res.json();
+  if (res.ok) {
+    currentCoins = data.newCoins;
+    updateCoinDisplay();
+    alert("Redemption request submitted! We'll process soon.");
+    document.getElementById("redeemModal").style.display = "none";
+  } else {
+    alert(data.error);
+  }
+};
+
+// Event binding
+document.getElementById("spinBtn").addEventListener("click", spin);
+document.getElementById("collectBtn").addEventListener("click", closeWin);
+initAuth();
+</script>
 </body>
 </html>
