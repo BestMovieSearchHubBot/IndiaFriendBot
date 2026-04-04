@@ -170,7 +170,7 @@ body {
   cursor: pointer;
 }
 
-/* ✨ NEW: WIN OVERLAY STYLE (CASINO TYPE) */
+/* ✨ WIN OVERLAY STYLE */
 #winOverlay {
   display: none; 
   position: fixed; 
@@ -278,50 +278,10 @@ body {
   <div class="win-box">
     <h1 class="win-title">BIG WIN!</h1>
     <div class="win-amount" id="winLabel">+0</div>
-    <button class="collect-btn" onclick="closeWin()">COLLECT</button>
+    <button class="collect-btn" id="collectBtn">COLLECT</button>
   </div>
 </div>
 
 <script src="script.js"></script>
-<script>
-// SPIN BUTTON LOGIC
-const spinBtn = document.getElementById('spinBtn');
-spinBtn.addEventListener('click', () => {
-    if (typeof spin === "function") spin(); 
-});
-
-// PREVENT LONG PRESS
-document.body.addEventListener('contextmenu', e => e.preventDefault());
-
-/* 🔹 WIN OVERLAY FUNCTIONS (Call these from script.js) */
-function showWinAnimation(amount) {
-  const overlay = document.getElementById("winOverlay");
-  const winLabel = document.getElementById("winLabel");
-  const coinsEl = document.getElementById("coins");
-
-  winLabel.innerText = "+" + amount + " COINS";
-  overlay.style.display = "flex";
-
-  // Smooth Coin Count-up
-  let currentCoins = parseInt(coinsEl.innerText);
-  let targetCoins = currentCoins + amount;
-  let step = Math.ceil(amount / 20);
-  
-  let counter = setInterval(() => {
-    currentCoins += step;
-    if (currentCoins >= targetCoins) {
-      currentCoins = targetCoins;
-      clearInterval(counter);
-    }
-    coinsEl.innerText = currentCoins;
-  }, 50);
-}
-
-function closeWin() {
-  document.getElementById("winOverlay").style.display = "none";
-  document.querySelectorAll('.glow').forEach(el => el.classList.remove('glow'));
-}
-</script>
-
 </body>
 </html>
