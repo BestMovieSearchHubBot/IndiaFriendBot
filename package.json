@@ -1,14 +1,14 @@
 {
-  "name": "spin-bot",
+  "name": "lucky-gems-slot",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node server.js"
   },
   "dependencies": {
-    "telegraf": "^4.12.2",
-    "mongoose": "^7.0.0",
-    "dotenv": "^16.0.0",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "mongoose": "^7.5.0",
+    "dotenv": "^16.3.1",
+    "cors": "^2.8.5"
   }
 }
