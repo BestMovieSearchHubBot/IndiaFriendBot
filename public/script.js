@@ -7,13 +7,26 @@ const gems = [
 ];
 
 let coinsEl = document.getElementById("coins");
-let coins = 1000;
+let coins = 1030;   // as per HTML
 
-let isSpinning = false;   // ✅ NEW (lock system)
-let finishedReels = 0;    // ✅ track reels finish
+let isSpinning = false;   // ✅ spin lock
+let finishedReels = 0;
+const BIG_WIN_THRESHOLD = 15;   // ✅ 15 या उससे अधिक पर बड़ा पॉपअप
 
-// create reel
-function createReel(id){
+// ✅ disable/enable spin button
+function setSpinEnabled(enabled) {
+  const btn = document.getElementById("spinBtn");
+  if (enabled) {
+    btn.style.pointerEvents = "auto";
+    btn.style.opacity = "1";
+  } else {
+    btn.style.pointerEvents = "none";
+    btn.style.opacity = "0.6";
+  }
+}
+
+// create reel (3 copies of each gem, shuffled)
+function createReel(id) {
   let reel = document.getElementById(id);
   reel.innerHTML = "";
 
@@ -22,9 +35,9 @@ function createReel(id){
 
   let reelImages = [];
 
-  while(reelImages.length < 15){
+  while (reelImages.length < 15) {
     let gem = gems[Math.floor(Math.random() * gems.length)];
-    if(gemCount[gem] < 3){
+    if (gemCount[gem] < 3) {
       reelImages.push(gem);
       gemCount[gem]++;
     }
@@ -39,25 +52,35 @@ function createReel(id){
   });
 }
 
-// init
+// initial fill
 createReel("r1");
 createReel("r2");
 createReel("r3");
 
-// spin
-function spin(){
-  if(isSpinning) return; // ❌ block multiple clicks
+// ✅ spin function with lock and bet deduction
+function spin() {
+  if (isSpinning) return;
 
   isSpinning = true;
+  setSpinEnabled(false);
   finishedReels = 0;
+
+  if (coins <= 0) {
+    alert("Out of coins! Game Over.");
+    isSpinning = false;
+    setSpinEnabled(true);
+    return;
+  }
+  coins--;
+  coinsEl.innerText = coins;
 
   spinReel("r1", 0);
   spinReel("r2", 200);
   spinReel("r3", 400);
 }
 
-// smooth spin
-function spinReel(id, delay){
+// spin animation (unchanged)
+function spinReel(id, delay) {
   const reel = document.getElementById(id);
   const imgHeight = 69;
   const totalHeight = imgHeight * reel.children.length;
@@ -65,47 +88,88 @@ function spinReel(id, delay){
   let start = null;
   let duration = 2500 + delay;
 
-  function easeOut(t){
+  function easeOut(t) {
     return 1 - Math.pow(1 - t, 3);
   }
 
-  function animate(timestamp){
-    if(!start) start = timestamp;
+  function animate(timestamp) {
+    if (!start) start = timestamp;
     let progress = timestamp - start;
-
     let t = Math.min(progress / duration, 1);
     let eased = easeOut(t);
-
     let move = eased * (totalHeight * 3);
     reel.style.transform = `translateY(${-move % totalHeight}px)`;
 
-    if(progress < duration){
+    if (progress < duration) {
       requestAnimationFrame(animate);
     } else {
-      // ✅ force clean stop (no stuck issue)
       reel.style.transform = "translateY(0)";
       createReel(id);
-
       finishedReels++;
 
-      // ✅ only after ALL reels stop
-      if(finishedReels === 3){
-        setTimeout(()=>{
+      if (finishedReels === 3) {
+        setTimeout(() => {
           checkWin();
-          isSpinning = false; // unlock spin
         }, 200);
       }
     }
   }
 
-  setTimeout(()=>{
+  setTimeout(() => {
     requestAnimationFrame(animate);
   }, delay);
 }
 
-// ... (Purana variable aur createReel same rahega) ...
+// ✅ normal win: smooth coin count-up (no popup)
+function updateCoinsSimple(amount, callback) {
+  let startVal = coins;
+  let targetVal = coins + amount;
+  let step = Math.max(1, Math.ceil(amount / 20));
+  let interval = setInterval(() => {
+    startVal += step;
+    if (startVal >= targetVal) {
+      startVal = targetVal;
+      clearInterval(interval);
+      coins = targetVal;
+      coinsEl.innerText = coins;
+      if (callback) callback();
+    } else {
+      coins = startVal;
+      coinsEl.innerText = coins;
+    }
+  }, 40);
+}
 
-function checkWin(){
+// ✅ big win overlay
+function showBigWinOverlay(amount) {
+  const overlay = document.getElementById("winOverlay");
+  const winLabel = document.getElementById("winLabel");
+  winLabel.innerText = "+" + amount + " COINS";
+  overlay.style.display = "flex";
+  window._bigWinAmount = amount;
+}
+
+// ✅ close overlay and add coins
+function closeWin() {
+  const overlay = document.getElementById("winOverlay");
+  overlay.style.display = "none";
+  document.querySelectorAll('.glow').forEach(el => el.classList.remove('glow'));
+
+  if (window._bigWinAmount && window._bigWinAmount > 0) {
+    let winAmount = window._bigWinAmount;
+    window._bigWinAmount = 0;
+    updateCoinsSimple(winAmount, () => {
+      isSpinning = false;
+      setSpinEnabled(true);
+    });
+  } else {
+    isSpinning = false;
+    setSpinEnabled(true);
+  }
+}
+
+// ✅ check win (original logic + big/normal split)
+function checkWin() {
   let reels = [
     document.getElementById("r1"),
     document.getElementById("r2"),
@@ -115,64 +179,53 @@ function checkWin(){
   let totalWin = 0;
   let glowTargets = [];
 
-  for(let row=0; row<3; row++){
+  for (let row = 0; row < 3; row++) {
     let a = reels[0].children[row];
     let b = reels[1].children[row];
     let c = reels[2].children[row];
 
-    // Win Logic
-    if(a.src === b.src && b.src === c.src){
+    if (a.src === b.src && b.src === c.src) {
       totalWin += 50;
       glowTargets.push(a, b, c);
-    } 
-    else if(a.src === b.src || b.src === c.src || a.src === c.src){
+    } else if (a.src === b.src || b.src === c.src || a.src === c.src) {
       totalWin += 10;
-      if(a.src === b.src) glowTargets.push(a, b);
-      if(b.src === c.src) glowTargets.push(b, c);
-      if(a.src === c.src) glowTargets.push(a, c);
+      if (a.src === b.src) glowTargets.push(a, b);
+      if (b.src === c.src) glowTargets.push(b, c);
+      if (a.src === c.src) glowTargets.push(a, c);
     }
   }
 
-  if(totalWin > 0){
-    // Highlight winning gems
+  if (totalWin > 0) {
     glowTargets.forEach(img => img.classList.add("glow"));
 
-    // Delay ke baad overlay dikhao
-    setTimeout(() => {
-      showWinAnimation(totalWin);
-    }, 500);
+    if (totalWin >= BIG_WIN_THRESHOLD) {
+      // 🎰 बड़ी जीत – पॉपअप दिखाएँ, स्पिन लॉक रहेगा
+      showBigWinOverlay(totalWin);
+      // isSpinning को false बाद में COLLECT पर किया जाएगा
+    } else {
+      // 🟢 छोटी जीत – सिर्फ कॉइन अपडेट करें, फिर स्पिन अनलॉक
+      updateCoinsSimple(totalWin, () => {
+        isSpinning = false;
+        setSpinEnabled(true);
+        setTimeout(() => {
+          document.querySelectorAll('.glow').forEach(el => el.classList.remove('glow'));
+        }, 500);
+      });
+    }
+  } else {
+    // कोई जीत नहीं
+    isSpinning = false;
+    setSpinEnabled(true);
+    document.querySelectorAll('.glow').forEach(el => el.classList.remove('glow'));
   }
 }
 
-// ✨ NAYA: Casino Animation Function
-function showWinAnimation(amount) {
-  const overlay = document.getElementById("winOverlay");
-  const winLabel = document.getElementById("winLabel");
-  
-  winLabel.innerText = "+" + amount + " COINS";
-  overlay.style.display = "flex";
-  
-  // Coin count-up effect (Visual update)
-  let startValue = coins;
-  coins += amount;
-  let duration = 1000; 
-  let startTime = null;
+// ✅ event listeners
+document.getElementById("spinBtn").addEventListener("click", () => {
+  if (typeof spin === "function") spin();
+});
+document.getElementById("collectBtn").addEventListener("click", closeWin);
+document.body.addEventListener("contextmenu", e => e.preventDefault());
 
-  function updateCoins(timestamp) {
-    if (!startTime) startTime = timestamp;
-    let progress = timestamp - startTime;
-    let current = Math.min(Math.floor(startValue + (amount * (progress / duration))), coins);
-    coinsEl.textContent = current;
-    if (progress < duration) requestAnimationFrame(updateCoins);
-  }
-  requestAnimationFrame(updateCoins);
-}
-
-// Collect button click function
-function closeWin() {
-  const overlay = document.getElementById("winOverlay");
-  overlay.style.display = "none";
-  
-  // Clean up glow classes
-  document.querySelectorAll('.glow').forEach(el => el.classList.remove('glow'));
-}
+// sync display
+coinsEl.innerText = coins;
