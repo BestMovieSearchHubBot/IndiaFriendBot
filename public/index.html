@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Lucky Gems Slot - Real Store</title>
+<title>Lucky Gems Slot</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;900&display=swap" rel="stylesheet">
 <style>
-/* ===== YOUR ORIGINAL CSS (exactly as provided) ===== */
+/* ===== YOUR EXACT CSS (same as original) ===== */
 * { box-sizing: border-box; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
 body { margin: 0; padding: 0; font-family: 'Orbitron', sans-serif; background: url('bg.jpg') no-repeat center center fixed; background-size: cover; height: 100vh; overflow: hidden; touch-action: none; }
 .topbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); color: white; position: relative; z-index: 10; }
@@ -34,8 +35,6 @@ body { margin: 0; padding: 0; font-family: 'Orbitron', sans-serif; background: u
 @keyframes rotateRays { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
 .glow { filter: drop-shadow(0 0 15px gold) brightness(1.2); transform: scale(1.1); transition: 0.3s; }
-
-/* extra UI for referral & redeem */
 .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
 .modal-content { background: #1e1a0e; padding: 20px; border-radius: 20px; border: 2px solid gold; width: 90%; max-width: 400px; color: white; font-family: monospace; }
 .modal-content input, .modal-content select { width: 100%; padding: 10px; margin: 10px 0; border-radius: 10px; }
@@ -49,7 +48,6 @@ body { margin: 0; padding: 0; font-family: 'Orbitron', sans-serif; background: u
 <div class="controls"><div class="bet-bar"><img src="bet-bar.png" alt="bet"><div class="bet-text">BET 1</div></div><div class="spin-btn" id="spinBtn"><img src="spin-btn.png" alt="spin"></div></div>
 <div id="winOverlay"><div class="rays"></div><div class="win-box"><h1 class="win-title">BIG WIN!</h1><div class="win-amount" id="winLabel">+0</div><button class="collect-btn" id="collectBtn">COLLECT</button></div></div>
 
-<!-- Referral & Redeem UI -->
 <div class="refer-box" id="referBtn">🔗 REFER & GET 10</div>
 <div class="redeem-btn" id="redeemBtn">🎁 REDEEM</div>
 
@@ -63,7 +61,11 @@ body { margin: 0; padding: 0; font-family: 'Orbitron', sans-serif; background: u
 <p id="redeemMsg"></p></div></div>
 
 <script>
-// Global state
+// Telegram WebApp initialization
+const tg = window.Telegram.WebApp;
+tg.expand(); // full screen
+tg.ready();
+
 let userId = null;
 let currentCoins = 0;
 let isSpinning = false;
@@ -81,7 +83,6 @@ const gemsList = [
 function createReelDom(id, imagesArray) {
   const reel = document.getElementById(id);
   reel.innerHTML = "";
-  // imagesArray is array of 15 image URLs
   imagesArray.forEach(src => {
     let img = document.createElement("img");
     img.src = src;
@@ -104,7 +105,6 @@ function generateRandomReelImages() {
   return arr;
 }
 
-// Initialize reels
 function initReels() {
   createReelDom("r1", generateRandomReelImages());
   createReelDom("r2", generateRandomReelImages());
@@ -112,18 +112,16 @@ function initReels() {
 }
 initReels();
 
-// Update coin display with 2 decimals
 function updateCoinDisplay() {
   document.getElementById("coins").innerText = currentCoins.toFixed(2);
 }
 
-// Spin animation (preserves original look but uses final matrix from server)
+// Animation (same as before)
 function animateSpin(finalMatrix, winAmount, newCoins) {
   return new Promise((resolve) => {
     let spins = 0;
     const totalSpins = 20;
     const interval = setInterval(() => {
-      // show random symbols during spin
       for (let i = 1; i <= 3; i++) {
         let randomImgs = [];
         for (let s = 0; s < 15; s++) randomImgs.push(gemsList[Math.floor(Math.random() * gemsList.length)]);
@@ -132,13 +130,9 @@ function animateSpin(finalMatrix, winAmount, newCoins) {
       spins++;
       if (spins >= totalSpins) {
         clearInterval(interval);
-        // set final result
         for (let col = 0; col < 3; col++) {
           let colImages = [];
-          for (let row = 0; row < 3; row++) {
-            colImages.push(finalMatrix[row][col]);
-          }
-          // Need 15 images, repeat pattern? Actually for display we only need top 3 visible. Simpler: recreate reel with 15 images where top 3 are the final row symbols.
+          for (let row = 0; row < 3; row++) colImages.push(finalMatrix[row][col]);
           let fullReel = [...colImages, ...colImages, ...colImages, ...colImages, ...colImages].slice(0,15);
           createReelDom(`r${col+1}`, fullReel);
         }
@@ -148,7 +142,6 @@ function animateSpin(finalMatrix, winAmount, newCoins) {
   });
 }
 
-// Show normal win count-up (no popup)
 function updateCoinsSmooth(targetCoins, callback) {
   let start = currentCoins;
   let step = Math.max(0.05, (targetCoins - start) / 20);
@@ -167,7 +160,6 @@ function updateCoinsSmooth(targetCoins, callback) {
   }, 30);
 }
 
-// Big win overlay
 function showBigWinOverlay(amount) {
   document.getElementById("winLabel").innerText = `+${amount.toFixed(2)} COINS`;
   document.getElementById("winOverlay").style.display = "flex";
@@ -176,7 +168,6 @@ function showBigWinOverlay(amount) {
 
 function closeWin() {
   document.getElementById("winOverlay").style.display = "none";
-  // add coins after collect
   updateCoinsSmooth(currentCoins + bigWinAmount, () => {
     isSpinning = false;
     enableSpinButton(true);
@@ -184,65 +175,13 @@ function closeWin() {
   bigWinAmount = 0;
 }
 
-// Spin API call
-async function spin() {
-  if (isSpinning) return;
-  isSpinning = true;
-  enableSpinButton(false);
-  
-  // Deduct 1 coin locally optimistic? Better call backend first
-  try {
-    const res = await fetch('/api/spin', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId })
-    });
-    const data = await res.json();
-    if (res.status !== 200) throw new Error(data.error);
-    // Deduct 1 coin from current display
-    currentCoins = data.newCoins - data.win; // after deduction, before win addition
-    updateCoinDisplay();
-    
-    // Animate spin with result matrix
-    await animateSpin(data.matrix, data.win, data.newCoins);
-    
-    // Highlight winning rows (glow) - compute from matrix
-    highlightWins(data.matrix);
-    
-    if (data.win > 0) {
-      if (data.win >= 15) {
-        showBigWinOverlay(data.win);
-        // spin remains locked until collect
-      } else {
-        // normal win count-up
-        updateCoinsSmooth(currentCoins + data.win, () => {
-          isSpinning = false;
-          enableSpinButton(true);
-          clearGlows();
-        });
-      }
-    } else {
-      isSpinning = false;
-      enableSpinButton(true);
-      clearGlows();
-    }
-  } catch (err) {
-    console.error(err);
-    alert("Spin failed: " + err.message);
-    isSpinning = false;
-    enableSpinButton(true);
-  }
-}
-
 function highlightWins(matrix) {
   clearGlows();
-  // matrix is 3x3 (rows, cols)
   for (let row = 0; row < 3; row++) {
     const a = matrix[row][0];
     const b = matrix[row][1];
     const c = matrix[row][2];
     if (a === b && b === c) {
-      // all three
       for (let col = 0; col < 3; col++) {
         const reelDiv = document.getElementById(`r${col+1}`);
         const imgs = reelDiv.children;
@@ -279,26 +218,67 @@ function enableSpinButton(enabled) {
   }
 }
 
-// Authentication & referral
-async function initAuth() {
-  let username = localStorage.getItem('slotUsername');
-  let referCode = new URLSearchParams(window.location.search).get('ref');
-  if (!username) {
-    username = prompt("Enter your username:", "Player" + Math.floor(Math.random()*1000));
-    if (!username) username = "Guest" + Date.now();
+// Spin API call
+async function spin() {
+  if (isSpinning) return;
+  isSpinning = true;
+  enableSpinButton(false);
+  try {
+    const res = await fetch('/api/spin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId })
+    });
+    const data = await res.json();
+    if (res.status !== 200) throw new Error(data.error);
+    currentCoins = data.newCoins - data.win;
+    updateCoinDisplay();
+    await animateSpin(data.matrix, data.win, data.newCoins);
+    highlightWins(data.matrix);
+    if (data.win > 0) {
+      if (data.win >= 15) {
+        showBigWinOverlay(data.win);
+      } else {
+        updateCoinsSmooth(currentCoins + data.win, () => {
+          isSpinning = false;
+          enableSpinButton(true);
+          clearGlows();
+        });
+      }
+    } else {
+      isSpinning = false;
+      enableSpinButton(true);
+      clearGlows();
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Spin failed: " + err.message);
+    isSpinning = false;
+    enableSpinButton(true);
   }
+}
+
+// Authentication via Telegram WebApp
+async function initAuth() {
+  const tgUser = tg.initDataUnsafe?.user;
+  if (!tgUser) {
+    alert("Please open from Telegram app");
+    return;
+  }
+  const telegramId = tgUser.id.toString();
+  const urlParams = new URLSearchParams(window.location.search);
+  const referCode = urlParams.get('startapp'); // from /start?startapp=CODE
+
   const res = await fetch('/api/auth', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, referCode })
+    body: JSON.stringify({ telegramId, referCode })
   });
   const data = await res.json();
   userId = data.userId;
   currentCoins = data.coins;
   updateCoinDisplay();
-  document.getElementById("username").innerText = data.username;
-  localStorage.setItem('slotUsername', data.username);
-  // store referral code for later
+  document.getElementById("username").innerText = tgUser.first_name || "Player";
   window.myReferralCode = data.referralCode;
 }
 
@@ -309,7 +289,7 @@ document.getElementById("referBtn").onclick = () => {
 };
 document.getElementById("closeReferModal").onclick = () => document.getElementById("referModal").style.display = "none";
 
-// Redeem modal logic
+// Redeem logic
 document.getElementById("redeemBtn").onclick = () => {
   document.getElementById("redeemModal").style.display = "flex";
   document.getElementById("redeemMsg").innerText = "";
@@ -343,7 +323,7 @@ document.getElementById("submitRedeem").onclick = async () => {
   if (res.ok) {
     currentCoins = data.newCoins;
     updateCoinDisplay();
-    alert("Redemption request submitted! We'll process soon.");
+    alert("Redemption request submitted!");
     document.getElementById("redeemModal").style.display = "none";
   } else {
     alert(data.error);
