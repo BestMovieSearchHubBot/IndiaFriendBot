@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
+const TelegramBot = require('node-telegram-bot-api');
 
 const app = express();
 app.use(cors());
@@ -13,12 +14,12 @@ app.use(express.static('public'));
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-}).then(() => console.log('MongoDB connected'))
-  .catch(err => console.log(err));
+}).then(() => console.log('MongoDB connected'));
 
-// User Schema
+// User Schema (Telegram ID based)
 const UserSchema = new mongoose.Schema({
-  username: { type: String, unique: true, required: true },
+  telegramId: { type: String, unique: true, required: true },
+  username: { type: String, default: '' },
   coins: { type: Number, default: 1030.00 },
   referralCode: { type: String, unique: true },
   referredBy: { type: String, default: null },
@@ -31,45 +32,82 @@ UserSchema.pre('save', function(next) {
   }
   next();
 });
-
 const User = mongoose.model('User', UserSchema);
 
-// Redemption Schema
+// Redeem Schema
 const RedeemSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   type: { type: String, enum: ['amazon', 'googleplay', 'freediamond'] },
   amount: Number,
-  email: String,        // for vouchers
-  uid: String,          // for Free Fire
-  status: { type: String, default: 'pending' },
-  createdAt: { type: Date, default: Date.now }
+  email: String,
+  uid: String,
+  status: { type: String, default: 'pending' }
 });
 const Redeem = mongoose.model('Redeem', RedeemSchema);
 
-// ---------- API Routes ----------
+// ---------- Telegram Bot ----------
+const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 
-// Register or login (simple username)
-app.post('/api/auth', async (req, res) => {
-  const { username, referCode } = req.body;
-  if (!username) return res.status(400).json({ error: 'Username required' });
-  let user = await User.findOne({ username });
+// WebApp URL (Render का आपका domain)
+const WEBAPP_URL = process.env.WEBAPP_URL || 'https://your-app.onrender.com';
+
+bot.onText(/\/start(?:\s+(.+))?/, async (msg, match) => {
+  const chatId = msg.chat.id;
+  const refCode = match[1] || null;
+  const telegramId = msg.from.id.toString();
+  const name = msg.from.first_name || 'Player';
+
+  // Find or create user
+  let user = await User.findOne({ telegramId });
   if (!user) {
-    user = new User({ username });
+    user = new User({ telegramId, username: name });
     await user.save();
-    // Handle referral bonus
-    if (referCode) {
-      const referrer = await User.findOne({ referralCode: referCode });
-      if (referrer && referrer.username !== username) {
-        // Give 10 coins to both
+    
+    // Referral bonus
+    if (refCode) {
+      const referrer = await User.findOne({ referralCode: refCode });
+      if (referrer && referrer.telegramId !== telegramId) {
         referrer.coins += 10;
         await referrer.save();
         user.coins += 10;
-        user.referredBy = referrer.username;
+        user.referredBy = referrer.telegramId;
         await user.save();
       }
     }
   }
-  res.json({ userId: user._id, username: user.username, coins: user.coins, referralCode: user.referralCode });
+
+  // Send inline keyboard with WebApp button
+  const opts = {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: '🎰 PLAY LUCKY GEMS', web_app: { url: `${WEBAPP_URL}?startapp=${user.referralCode}` } }]
+      ]
+    }
+  };
+  bot.sendMessage(chatId, `✨ Welcome ${name}!\n💰 Coins: ${user.coins.toFixed(2)}\n🔗 Your referral code: ${user.referralCode}\n\nShare code with friends, you both get 10 coins!`, opts);
+});
+
+// ---------- API Routes ----------
+// Auth / get user by telegramId (called from WebApp)
+app.post('/api/auth', async (req, res) => {
+  const { telegramId, referCode } = req.body;
+  if (!telegramId) return res.status(400).json({ error: 'Telegram ID required' });
+  let user = await User.findOne({ telegramId });
+  if (!user) {
+    user = new User({ telegramId, username: 'Player' });
+    await user.save();
+    if (referCode) {
+      const referrer = await User.findOne({ referralCode: referCode });
+      if (referrer && referrer.telegramId !== telegramId) {
+        referrer.coins += 10;
+        await referrer.save();
+        user.coins += 10;
+        user.referredBy = referrer.telegramId;
+        await user.save();
+      }
+    }
+  }
+  res.json({ userId: user._id, telegramId: user.telegramId, coins: user.coins, referralCode: user.referralCode });
 });
 
 // Get user data
@@ -79,7 +117,7 @@ app.get('/api/user/:userId', async (req, res) => {
   res.json({ username: user.username, coins: user.coins, referralCode: user.referralCode });
 });
 
-// Spin logic (bet 1 coin, 3 reels, 3 rows, paytable)
+// Slot machine logic (same as before)
 const gemsList = [
   "https://cdn.jsdelivr.net/gh/BestMovieSearchHubBot/IndiaFriendBot@main/public/gems/red.png",
   "https://cdn.jsdelivr.net/gh/BestMovieSearchHubBot/IndiaFriendBot@main/public/gems/blue.png",
@@ -92,7 +130,6 @@ function getRandomGem() {
   return gemsList[Math.floor(Math.random() * gemsList.length)];
 }
 
-// Generate a random 3x3 matrix (each cell a gem URL)
 function generateRandomMatrix() {
   const matrix = [];
   for (let i = 0; i < 3; i++) {
@@ -104,34 +141,27 @@ function generateRandomMatrix() {
   return matrix;
 }
 
-// Calculate win amount for a given matrix (bet = 1 coin)
 function calculateWin(matrix) {
   let totalWin = 0;
   for (let row = 0; row < 3; row++) {
     const a = matrix[row][0];
     const b = matrix[row][1];
     const c = matrix[row][2];
-    if (a === b && b === c) {
-      totalWin += 5;      // 5x bet
-    } else if (a === b || b === c || a === c) {
-      totalWin += 0.5;    // 0.5x bet
-    }
+    if (a === b && b === c) totalWin += 5;
+    else if (a === b || b === c || a === c) totalWin += 0.5;
   }
   return totalWin;
 }
 
 app.post('/api/spin', async (req, res) => {
   const { userId } = req.body;
-  if (!userId) return res.status(400).json({ error: 'User ID required' });
   const user = await User.findById(userId);
   if (!user) return res.status(404).json({ error: 'User not found' });
   if (user.coins < 1) return res.status(400).json({ error: 'Insufficient coins' });
 
-  // Deduct bet
   user.coins -= 1;
   await user.save();
 
-  // Generate random result
   const matrix = generateRandomMatrix();
   const winAmount = calculateWin(matrix);
   let newCoins = user.coins;
@@ -141,21 +171,17 @@ app.post('/api/spin', async (req, res) => {
     await user.save();
   }
 
-  res.json({
-    matrix: matrix,
-    win: winAmount,
-    newCoins: newCoins
-  });
+  res.json({ matrix, win: winAmount, newCoins });
 });
 
-// Referral code info
+// Referral code
 app.get('/api/referral/:userId', async (req, res) => {
   const user = await User.findById(req.params.userId);
   if (!user) return res.status(404).json({ error: 'User not found' });
   res.json({ referralCode: user.referralCode });
 });
 
-// Redeem request
+// Redeem
 app.post('/api/redeem', async (req, res) => {
   const { userId, type, email, uid } = req.body;
   const user = await User.findById(userId);
@@ -164,32 +190,21 @@ app.post('/api/redeem', async (req, res) => {
   let requiredCoins = 0;
   if (type === 'amazon' || type === 'googleplay') {
     requiredCoins = 500;
-    if (!email) return res.status(400).json({ error: 'Email required for voucher' });
+    if (!email) return res.status(400).json({ error: 'Email required' });
   } else if (type === 'freediamond') {
     requiredCoins = 420;
-    if (!uid) return res.status(400).json({ error: 'UID required for Free Fire' });
-  } else {
-    return res.status(400).json({ error: 'Invalid redeem type' });
-  }
+    if (!uid) return res.status(400).json({ error: 'UID required' });
+  } else return res.status(400).json({ error: 'Invalid type' });
 
-  if (user.coins < requiredCoins) {
-    return res.status(400).json({ error: `Need ${requiredCoins} coins` });
-  }
+  if (user.coins < requiredCoins) return res.status(400).json({ error: `Need ${requiredCoins} coins` });
 
-  // Deduct coins
   user.coins -= requiredCoins;
   await user.save();
 
-  const redeem = new Redeem({
-    userId: user._id,
-    type,
-    amount: requiredCoins,
-    email: email || null,
-    uid: uid || null
-  });
+  const redeem = new Redeem({ userId: user._id, type, amount: requiredCoins, email, uid });
   await redeem.save();
 
-  res.json({ success: true, newCoins: user.coins, message: 'Redemption request submitted' });
+  res.json({ success: true, newCoins: user.coins });
 });
 
 const PORT = process.env.PORT || 3000;
