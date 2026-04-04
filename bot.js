@@ -16,7 +16,7 @@ mongoose.connect(process.env.MONGO_URI, {
   useUnifiedTopology: true,
 }).then(() => console.log('MongoDB connected'));
 
-// User Schema (Telegram ID based)
+// User Schema
 const UserSchema = new mongoose.Schema({
   telegramId: { type: String, unique: true, required: true },
   username: { type: String, default: '' },
@@ -47,23 +47,19 @@ const Redeem = mongoose.model('Redeem', RedeemSchema);
 
 // ---------- Telegram Bot ----------
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
+const WEBAPP_URL = process.env.WEBAPP_URL;
 
-// WebApp URL (Render का आपका domain)
-const WEBAPP_URL = process.env.WEBAPP_URL || 'https://your-app.onrender.com';
-
+// Only /start command – sends single WebApp button
 bot.onText(/\/start(?:\s+(.+))?/, async (msg, match) => {
   const chatId = msg.chat.id;
   const refCode = match[1] || null;
   const telegramId = msg.from.id.toString();
   const name = msg.from.first_name || 'Player';
 
-  // Find or create user
   let user = await User.findOne({ telegramId });
   if (!user) {
     user = new User({ telegramId, username: name });
     await user.save();
-    
-    // Referral bonus
     if (refCode) {
       const referrer = await User.findOne({ referralCode: refCode });
       if (referrer && referrer.telegramId !== telegramId) {
@@ -76,7 +72,6 @@ bot.onText(/\/start(?:\s+(.+))?/, async (msg, match) => {
     }
   }
 
-  // Send inline keyboard with WebApp button
   const opts = {
     reply_markup: {
       inline_keyboard: [
@@ -84,11 +79,13 @@ bot.onText(/\/start(?:\s+(.+))?/, async (msg, match) => {
       ]
     }
   };
-  bot.sendMessage(chatId, `✨ Welcome ${name}!\n💰 Coins: ${user.coins.toFixed(2)}\n🔗 Your referral code: ${user.referralCode}\n\nShare code with friends, you both get 10 coins!`, opts);
+  bot.sendMessage(chatId, 
+    `✨ *${name}*, welcome to Lucky Gems!\n💰 Coins: ${user.coins.toFixed(2)}\n🔗 Your referral code: \`${user.referralCode}\`\n\nShare this code with friends – you both get 10 coins!`,
+    { parse_mode: 'Markdown', ...opts }
+  );
 });
 
 // ---------- API Routes ----------
-// Auth / get user by telegramId (called from WebApp)
 app.post('/api/auth', async (req, res) => {
   const { telegramId, referCode } = req.body;
   if (!telegramId) return res.status(400).json({ error: 'Telegram ID required' });
@@ -110,14 +107,12 @@ app.post('/api/auth', async (req, res) => {
   res.json({ userId: user._id, telegramId: user.telegramId, coins: user.coins, referralCode: user.referralCode });
 });
 
-// Get user data
 app.get('/api/user/:userId', async (req, res) => {
   const user = await User.findById(req.params.userId);
   if (!user) return res.status(404).json({ error: 'User not found' });
   res.json({ username: user.username, coins: user.coins, referralCode: user.referralCode });
 });
 
-// Slot machine logic (same as before)
 const gemsList = [
   "https://cdn.jsdelivr.net/gh/BestMovieSearchHubBot/IndiaFriendBot@main/public/gems/red.png",
   "https://cdn.jsdelivr.net/gh/BestMovieSearchHubBot/IndiaFriendBot@main/public/gems/blue.png",
@@ -126,17 +121,13 @@ const gemsList = [
   "https://cdn.jsdelivr.net/gh/BestMovieSearchHubBot/IndiaFriendBot@main/public/gems/purple.png"
 ];
 
-function getRandomGem() {
-  return gemsList[Math.floor(Math.random() * gemsList.length)];
-}
+function getRandomGem() { return gemsList[Math.floor(Math.random() * gemsList.length)]; }
 
 function generateRandomMatrix() {
   const matrix = [];
   for (let i = 0; i < 3; i++) {
     matrix[i] = [];
-    for (let j = 0; j < 3; j++) {
-      matrix[i][j] = getRandomGem();
-    }
+    for (let j = 0; j < 3; j++) matrix[i][j] = getRandomGem();
   }
   return matrix;
 }
@@ -144,9 +135,7 @@ function generateRandomMatrix() {
 function calculateWin(matrix) {
   let totalWin = 0;
   for (let row = 0; row < 3; row++) {
-    const a = matrix[row][0];
-    const b = matrix[row][1];
-    const c = matrix[row][2];
+    const a = matrix[row][0], b = matrix[row][1], c = matrix[row][2];
     if (a === b && b === c) totalWin += 5;
     else if (a === b || b === c || a === c) totalWin += 0.5;
   }
@@ -170,18 +159,15 @@ app.post('/api/spin', async (req, res) => {
     user.coins = newCoins;
     await user.save();
   }
-
   res.json({ matrix, win: winAmount, newCoins });
 });
 
-// Referral code
 app.get('/api/referral/:userId', async (req, res) => {
   const user = await User.findById(req.params.userId);
   if (!user) return res.status(404).json({ error: 'User not found' });
   res.json({ referralCode: user.referralCode });
 });
 
-// Redeem
 app.post('/api/redeem', async (req, res) => {
   const { userId, type, email, uid } = req.body;
   const user = await User.findById(userId);
@@ -203,7 +189,6 @@ app.post('/api/redeem', async (req, res) => {
 
   const redeem = new Redeem({ userId: user._id, type, amount: requiredCoins, email, uid });
   await redeem.save();
-
   res.json({ success: true, newCoins: user.coins });
 });
 
